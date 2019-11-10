@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:id="@+id/linearLayout">
+
+    <ImageView
+        android:id="@+id/c1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:srcCompat="@drawable/c108"
+        android:layout_marginLeft="125dp"/>
+
+    <ImageView
+        android:id="@+id/c2"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginLeft="-60dp"
+        app:srcCompat="@drawable/c108" />
+
+    <ImageView
+        android:id="@+id/c3"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginLeft="-60dp"
+        app:srcCompat="@drawable/c108" />
+
+    <ImageView
+        android:id="@+id/avatarIv"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="40dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/avatar_2" />
+
+    <TextView
+        android:id="@+id/nameTv"
+        android:layout_width="75dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="70dp"
+        android:gravity="center_horizontal"
+        android:text="Name"
+        android:layout_marginLeft="-62.5dp"/>
+</LinearLayout>
