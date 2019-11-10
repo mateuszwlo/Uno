@@ -2,6 +2,7 @@ package com.mateusz.uno.data;
 
 import java.util.ArrayList;
 import java.util.Random;
+import com.mateusz.uno.data.Card.Colour;
 
 public class Deck {
 

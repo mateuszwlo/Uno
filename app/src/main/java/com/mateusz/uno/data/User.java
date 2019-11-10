@@ -15,17 +15,15 @@ public class User implements Player {
     }
 
     @Override
-    public Card turn(Card c) {
-        if (c.getColour().equals(currentCard.getColour()) || c.getValue().equals(currentCard.getValue()) || c.getColour().equals(Colour.BLACK)) {
+    public void turn(Card c) {
+        if (c.getColour().equals(currentCard.getColour()) || c.getValue().equals(currentCard.getValue()) || c.getColour().equals(Card.Colour.BLACK)) {
             mView.removeCardView(c.getId());
-            return c;
         }
-        return null;
     }
 
     @Override
     public boolean hasUno() {
-        return (mView.getPlayer1CardCount() == 0);
+        return (mView.getPlayer1CardCount() == 1);
     }
 
     @Override
@@ -51,6 +49,6 @@ public class User implements Player {
 
     @Override
     public void wildCard() {
-        mView.showColourPickerDialog();
+        mView.showWildCardColourPickerDialog();
     }
 }

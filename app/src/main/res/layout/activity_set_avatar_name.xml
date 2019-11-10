@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.start.SetAvatarNameActivity">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter your name:"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/nameEt"
+        app:layout_constraintEnd_toStartOf="@id/nameEt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline21" />
+
+    <EditText
+        android:id="@+id/nameEt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Name"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/guideline21" />
+
+    <HorizontalScrollView
+        android:id="@+id/horizontalScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/guideline2">
+
+        <LinearLayout
+            android:id="@+id/avatarScrollView"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/avatar_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_1" />
+
+            <ImageView
+                android:id="@+id/avatar_2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_2" />
+
+            <ImageView
+                android:id="@+id/avatar_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_3" />
+
+            <ImageView
+                android:id="@+id/avatar_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_4" />
+
+            <ImageView
+                android:id="@+id/avatar_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_5" />
+
+            <ImageView
+                android:id="@+id/avatar_6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_6" />
+
+            <ImageView
+                android:id="@+id/avatar_7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_7" />
+
+            <ImageView
+                android:id="@+id/avatar_8"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_8" />
+
+            <ImageView
+                android:id="@+id/avatar_9"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_9" />
+
+            <ImageView
+                android:id="@+id/avatar_10"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_10" />
+
+            <ImageView
+                android:id="@+id/avatar_11"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_11" />
+
+            <ImageView
+                android:id="@+id/avatar_12"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_12" />
+
+            <ImageView
+                android:id="@+id/avatar_13"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_13" />
+
+            <ImageView
+                android:id="@+id/avatar_14"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_14" />
+
+            <ImageView
+                android:id="@+id/avatar_15"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_15" />
+
+            <ImageView
+                android:id="@+id/avatar_16"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="15dp"
+                android:layout_weight="1"
+                android:tint="#70000000"
+                app:srcCompat="@drawable/avatar_16" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.35" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline21"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="20dp"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <Button
+        android:id="@+id/continueBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Continue"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/horizontalScrollView" />
+</androidx.constraintlayout.widget.ConstraintLayout>

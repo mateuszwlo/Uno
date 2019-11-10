@@ -2,7 +2,7 @@ package com.mateusz.uno.data;
 
 public interface Player {
 
-    Card turn(Card c);
+    void turn(Card c);
     boolean hasUno();
     void drawCard();
     String getName();

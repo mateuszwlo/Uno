@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerVertical="false"
+    android:layout_gravity="center_vertical"
+    android:layout_marginBottom="100dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/playerLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="How many Players?"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/twoPlayerBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/onePlayerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="32dp"
+        android:text="1 v 1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playerLabel" />
+
+    <Button
+        android:id="@+id/twoPlayerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="1 v 2"
+        app:layout_constraintEnd_toStartOf="@+id/threePlayerBtn"
+        app:layout_constraintStart_toEndOf="@+id/onePlayerBtn"
+        app:layout_constraintTop_toBottomOf="@+id/playerLabel" />
+
+    <Button
+        android:id="@+id/threePlayerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:text="1 v 3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/playerLabel" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

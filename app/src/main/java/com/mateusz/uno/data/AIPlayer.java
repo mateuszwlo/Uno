@@ -1,14 +1,15 @@
 package com.mateusz.uno.data;
 
-import android.annotation.SuppressLint;
-import android.os.AsyncTask;
+import android.os.Handler;
 
 import com.mateusz.uno.ui.singleplayer.SinglePlayerMvpView;
 
 import java.util.ArrayList;
 import java.util.Random;
+
 import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.deck;
 import static com.mateusz.uno.ui.singleplayer.SinglePlayerActivity.game;
+import com.mateusz.uno.data.Card.Colour;
 
 public class AIPlayer implements Player {
 
@@ -36,11 +37,29 @@ public class AIPlayer implements Player {
     }
 
     @Override
-    public Card turn(final Card c) {
-        GetCard task = new GetCard();
-        task.execute(c);
+    public void turn(final Card c) {
 
-        return null;
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                Card playCard = null;
+
+                for (int i = 0; i < cards.size(); i++) {
+                    Card ci = cards.get(i);
+
+                    if (ci.getColour().equals(c.getColour()) || ci.getValue().equals(c.getValue()) || ci.getColour().equals(Colour.BLACK)) {
+                        cards.remove(i);
+                        playCard = ci;
+                        break;
+                    }
+                }
+
+                mView.adjustPlayerCardViews(id, cards.size());
+                game.turn(playCard);
+            }
+        }, turnTime);
     }
 
     @Override
@@ -50,121 +69,70 @@ public class AIPlayer implements Player {
 
     @Override
     public void changeColour() {
-        ChooseColour chooseColour = new ChooseColour();
-        chooseColour.execute();
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                Colour col = null;
+
+                Random r = new Random();
+                switch (r.nextInt(4)) {
+                    case 0:
+                        col =  Colour.RED;
+                        break;
+                    case 1:
+                        col =  Colour.YELLOW;
+                        break;
+                    case 2:
+                        col =  Colour.GREEN;
+                        break;
+                    case 3:
+                    default:
+                        col =  Colour.BLUE;
+                        break;
+                }
+
+                game.changeColour(col);
+            }
+        }, turnTime);
     }
 
     @Override
     public void wildCard() {
-        WildCard wildCard = new WildCard();
-        wildCard.execute();
+
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                Colour col = null;
+
+                Random r = new Random();
+                switch (r.nextInt(4)) {
+                    case 0:
+                        col =  Colour.RED;
+                        break;
+                    case 1:
+                        col =  Colour.YELLOW;
+                        break;
+                    case 2:
+                        col =  Colour.GREEN;
+                        break;
+                    case 3:
+                    default:
+                        col =  Colour.BLUE;
+                        break;
+                }
+
+                game.wildCard(col);
+            }
+        }, turnTime);
     }
 
     @Override
     public String getName() {
         return name;
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class GetCard extends AsyncTask<Card, Void, Card> {
-
-        @Override
-        protected Card doInBackground(Card... ccards) {
-            Card playCard = null;
-
-            for (int i = 0; i < cards.size(); i++) {
-                Card ci = cards.get(i);
-
-                if (ci.getColour().equals(ccards[0].getColour()) || ci.getValue().equals(ccards[0].getValue()) || ci.getColour().equals(Colour.BLACK)) {
-                    cards.remove(i);
-                    playCard = ci;
-                    break;
-                }
-            }
-
-            try {
-                Thread.sleep(turnTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            if (playCard == null) {
-                return new Card(-1, Colour.BLACK, "");
-            } else {
-                return playCard;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Card c) {
-            mView.adjustPlayerCardViews(id, cards.size());
-            game.playTurn(c);
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class ChooseColour extends AsyncTask<Colour, Void, Colour> {
-
-        @Override
-        protected Colour doInBackground(Colour... cols) {
-
-            try {
-                Thread.sleep(turnTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            Random r = new Random();
-            switch (r.nextInt(4)) {
-                case 0:
-                    return Colour.RED;
-                case 1:
-                    return Colour.YELLOW;
-                case 2:
-                    return Colour.GREEN;
-                case 3:
-                default:
-                    return Colour.BLUE;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Colour c) {
-            mView.adjustPlayerCardViews(id, cards.size());
-            game.changeColour(c);
-        }
-    }
-
-    @SuppressLint("StaticFieldLeak")
-    private class WildCard extends AsyncTask<Colour, Void, Colour> {
-
-        @Override
-        protected Colour doInBackground(Colour... cols) {
-
-            try {
-                Thread.sleep(turnTime);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            Random r = new Random();
-            switch (r.nextInt(4)) {
-                case 0:
-                    return Colour.RED;
-                case 1:
-                    return Colour.YELLOW;
-                case 2:
-                    return Colour.GREEN;
-                case 3:
-                default:
-                    return Colour.BLUE;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Colour c) {
-            mView.adjustPlayerCardViews(id, cards.size());
-            game.wildCard(c);
-        }
     }
 }

@@ -32,4 +32,12 @@ public class Card {
                 ", id=" + id +
                 '}';
     }
+
+    public enum Colour{
+        RED,
+        BLUE,
+        GREEN,
+        YELLOW,
+        BLACK
+    }
 }
