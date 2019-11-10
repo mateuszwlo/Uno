@@ -10,13 +10,12 @@
         android:id="@+id/playerTurnTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Player 1"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         app:layout_constraintBottom_toTopOf="@+id/guidelineh0.25"
         app:layout_constraintEnd_toStartOf="@+id/guidelinev0.15"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:textAllCaps="true" />
+        app:textAllCaps="true"
+        tools:text="Name's Turn" />
 
     <include
         android:id="@+id/player2Cards"
@@ -34,16 +33,17 @@
     <include
         android:id="@+id/player3Cards"
         layout="@layout/ai_player_cards_top"
-        android:layout_width="450dp"
+        android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
+        android:layout_marginEnd="32dp"
         android:layout_marginBottom="16dp"
         android:visibility="invisible"
         app:layout_constraintBottom_toTopOf="@+id/guidelineh0.25"
         app:layout_constraintEnd_toStartOf="@+id/guidelinev0.85"
-        app:layout_constraintStart_toStartOf="@+id/guidelinev0.15"
+        app:layout_constraintStart_toStartOf="@+id/guideline7"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 

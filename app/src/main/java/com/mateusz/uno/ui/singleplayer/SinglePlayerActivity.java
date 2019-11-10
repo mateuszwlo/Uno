@@ -2,7 +2,6 @@ package com.mateusz.uno.ui.singleplayer;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,11 +10,9 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.mateusz.uno.R;
@@ -23,9 +20,8 @@ import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Card.Colour;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
+import com.mateusz.uno.ui.singleplayer.PlayerCardView.AIPlayerCardView;
 import com.mateusz.uno.ui.start.StartActivity;
-
-import java.util.Random;
 
 import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.deck;
 
@@ -38,7 +34,6 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
     private AlertDialog colourPickerDialog;
     public static SinglePlayerGame game;
     private int playerCount;
-    private LinearLayout.LayoutParams cardParams;
     private HorizontalScrollView.LayoutParams scrollViewParams;
 
     @Override
@@ -61,10 +56,6 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
         pileIv = findViewById(R.id.pileIv);
         playerTurnTv = findViewById(R.id.playerTurnTv);
 
-        cardParams = new LinearLayout.LayoutParams(
-                (int) (100 * getResources().getDisplayMetrics().density),
-                LinearLayout.LayoutParams.MATCH_PARENT);
-
         scrollViewParams = new HorizontalScrollView.LayoutParams(
                 HorizontalScrollView.LayoutParams.MATCH_PARENT,
                 HorizontalScrollView.LayoutParams.MATCH_PARENT
@@ -79,7 +70,7 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
             case R.id.pileIv:
                 break;
             default:
-                game.turn(deck.fetchCard(view.getId()));
+                game.userTurn(deck.fetchCard(view.getId()));
                 break;
         }
     }
@@ -112,41 +103,85 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
     }
 
     //View Methods
-    @Override
-    public void player1AddCardView(Card c) {
-        ImageView iv = new ImageView(this);
-        iv.setImageResource(getResources().getIdentifier("c" + c.getId(), "drawable", getPackageName()));
-        iv.setId(c.getId());
-        iv.setOnClickListener(this);
 
-        userCards.addView(iv, getCardParams());
+    //User Cards
+    @Override
+    public void addCardView(int player, Card c) {
+
+        if(player == 0){
+            ImageView iv = new ImageView(this);
+            iv.setImageResource(getResources().getIdentifier("c" + c.getId(), "drawable", getPackageName()));
+            iv.setId(c.getId());
+            iv.setOnClickListener(this);
+
+            userCards.addView(iv, getUserCardParams());
+        }
+        else{
+            AIPlayerCardView cardView = findViewById(getResources()
+                    .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
+                    .findViewById(R.id.playerCardsLayout);
+
+            cardView.addCard(c);
+        }
     }
 
     @Override
-    public void gameDrawDialog() {
-        showGameEndDialog("Game ended in a draw.");
+    public void removeCardView(int player, Card c) {
+        if(player == 0){
+            userCards.removeView(findViewById(c.getId()));
+            getUserCardParams();
+        }
+        else{
+            AIPlayerCardView cardView = findViewById(getResources()
+                    .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
+                    .findViewById(R.id.playerCardsLayout);
+            cardView.removeCard(c);
+        }
     }
-
-    @Override
-    public void removeCardView(int id) {
-        userCards.removeView(findViewById(id));
-        getCardParams();
-    }
-
-    @Override
-    public void changeCurrentCardView(int id) { pileIv.setImageResource(getResources().getIdentifier("c" + id, "drawable", getPackageName())); }
-
-    @Override
-    public void showPlayerWinDialog(int player) { showGameEndDialog("Player " + (player + 1) + " Wins!"); }
 
     @Override
     public int getPlayer1CardCount() {
         return userCards.getChildCount();
     }
 
+    private LinearLayout.LayoutParams getUserCardParams(){
+
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
+                (int) (100 * getResources().getDisplayMetrics().density),
+                LinearLayout.LayoutParams.MATCH_PARENT);
+
+        LinearLayout l = userCards.findViewById(R.id.userCardsLayout);
+
+        //Decreasing or increasing left margins for all cards
+        int leftMargin = (int) (-60 * getResources().getDisplayMetrics().density);
+
+        cardParams.leftMargin = leftMargin;
+        cardParams.weight = 0;
+
+        //Setting margins for each card in the layout
+        for(int i = 0; i < l.getChildCount(); i++){
+            if(l.getChildAt(i).getId() != R.id.placeholderCard) l.getChildAt(i).setLayoutParams(cardParams);
+        }
+
+        //Adjusting width of placeholder for accommodate new left margin
+        LinearLayout.LayoutParams placeholderParams = new LinearLayout.LayoutParams(
+                leftMargin * -1,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+
+        l.findViewById(R.id.placeholderCard).setLayoutParams(placeholderParams);
+
+        if(l.getChildCount() < 7) scrollViewParams.gravity = Gravity.CENTER_HORIZONTAL;
+        else scrollViewParams.gravity = Gravity.START;
+
+        l.setLayoutParams(scrollViewParams);
+
+        return cardParams;
+    }
+
+    //Game
     @Override
-    public void changeTurnText(int to) {
-        playerTurnTv.setText("Player " + (to + 1));
+    public void changeCurrentCardView(int id) {
+        pileIv.setImageResource(getResources().getIdentifier("c" + id, "drawable", getPackageName()));
     }
 
     @Override
@@ -160,16 +195,54 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
             case YELLOW:
                 c = new Card(110, Colour.YELLOW, "SOLID");
                 break;
-             case GREEN:
-                 c = new Card(111, Colour.GREEN, "SOLID");
+            case GREEN:
+                c = new Card(111, Colour.GREEN, "SOLID");
                 break;
-             case BLUE:
-             default:
-                 c = new Card(112, Colour.BLUE, "SOLID");
+            case BLUE:
+            default:
+                c = new Card(112, Colour.BLUE, "SOLID");
                 break;
         }
         changeCurrentCardView(c.getId());
         game.changeCurrentCard(c);
+    }
+
+    @Override
+    public void changeTurnText(String player) {
+        playerTurnTv.setText(player + "'s Turn");
+    }
+
+    @Override
+    public void setupPlayerData(int player, UserData data) {
+
+        String tag = "player" + player + "Cards";
+
+        if(player == 1){
+            data = new SharedPrefsHelper(this).getUserData();
+            tag = "userCards";
+        }
+
+        ImageView iv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.avatarIv);
+        iv.setImageResource(data.getId());
+
+        TextView tv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.nameTv);
+        tv.setText(data.getName());
+    }
+
+    @Override
+    public int getAvatarResource(int id) {
+        return getResources().getIdentifier("avatar_" + id, "drawable", getPackageName());
+    }
+
+    //Dialogs
+    @Override
+    public void showPlayerWinDialog(String player) {
+        showGameEndDialog(player + " Wins!");
+    }
+
+    @Override
+    public void gameDrawDialog() {
+        showGameEndDialog("Game ended in a draw.");
     }
 
     @Override
@@ -221,37 +294,6 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
     }
 
     @Override
-    public void adjustPlayerCardViews(int id, int size) {
-
-        ConstraintLayout cardsLayout = findViewById(getResources().getIdentifier("player" + (id + 1) + "Cards", "id", getPackageName()));
-
-        switch (size){
-            case 3:
-            default:
-                cardsLayout.findViewById(R.id.c3).setVisibility(View.VISIBLE);
-                cardsLayout.findViewById(R.id.c2).setVisibility(View.VISIBLE);
-                cardsLayout.findViewById(R.id.c1).setVisibility(View.VISIBLE);
-                break;
-            case 2:
-                cardsLayout.findViewById(R.id.c3).setVisibility(View.VISIBLE);
-                cardsLayout.findViewById(R.id.c2).setVisibility(View.VISIBLE);
-                cardsLayout.findViewById(R.id.c1).setVisibility(View.INVISIBLE);
-                break;
-            case 1:
-                cardsLayout.findViewById(R.id.c3).setVisibility(View.INVISIBLE);
-                cardsLayout.findViewById(R.id.c2).setVisibility(View.INVISIBLE);
-                cardsLayout.findViewById(R.id.c1).setVisibility(View.VISIBLE);
-                break;
-            case 0:
-                cardsLayout.findViewById(R.id.c3).setVisibility(View.INVISIBLE);
-                cardsLayout.findViewById(R.id.c2).setVisibility(View.INVISIBLE);
-                cardsLayout.findViewById(R.id.c1).setVisibility(View.INVISIBLE);
-                break;
-
-            }
-        }
-
-    @Override
     public void showWildCardColourPickerDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
@@ -299,71 +341,16 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
         colourPickerDialog.show();
     }
 
-    @Override
-    public void setupPlayerData(int player, UserData data) {
-
-        String tag = "player" + player + "Cards";
-
-        if(player == 1){
-            data = new SharedPrefsHelper(this).getUserData();
-            tag = "userCards";
-        }
-
-        ImageView iv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.avatarIv);
-        iv.setImageResource(data.getId());
-
-        TextView tv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.nameTv);
-        tv.setText(data.getName());
-    }
-
-    @Override
-    public int getAvatarResource(int id) {
-        return getResources().getIdentifier("avatar_" + id, "drawable", getPackageName());
-    }
-
-    @Override
-    public void onBackPressed() {
-        startActivity(new Intent(SinglePlayerActivity.this, StartActivity.class));
-    }
-
-    private LinearLayout.LayoutParams getCardParams(){
-
-        LinearLayout l = userCards.findViewById(R.id.userCardsLayout);
-
-        //Decreasing or increasing left margins for all cards
-        int leftMargin = (int) (-60 * getResources().getDisplayMetrics().density);
-
-        cardParams.leftMargin = leftMargin;
-        cardParams.weight = 0;
-
-        //Setting margins for each card in the layout
-        for(int i = 0; i < l.getChildCount(); i++){
-            if(l.getChildAt(i).getId() != R.id.placeholderCard) l.getChildAt(i).setLayoutParams(cardParams);
-        }
-
-        //Adjusting width of placeholder for accommodate new left margin
-        LinearLayout.LayoutParams placeholderParams = new LinearLayout.LayoutParams(
-                leftMargin * -1,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-
-        findViewById(R.id.placeholderCard).setLayoutParams(placeholderParams);
-
-        if(l.getChildCount() < 7) scrollViewParams.gravity = Gravity.CENTER_HORIZONTAL;
-        else scrollViewParams.gravity = Gravity.LEFT;
-
-        l.setLayoutParams(scrollViewParams);
-
-        return cardParams;
-    }
-
     public void showGameEndDialog(String msg){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setCancelable(false)
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle(msg)
                 .setPositiveButton("Play Again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         finish();
-                        startActivity(new Intent(SinglePlayerActivity.this, SinglePlayerActivity.class));
+                        Intent i = new Intent(SinglePlayerActivity.this, SinglePlayerActivity.class);
+                        i.putExtra("playerCount", playerCount);
                     }
                 })
                 .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
@@ -372,9 +359,34 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
                         System.exit(0);
                     }
                 })
-                .setTitle(msg);
+                .create();
 
-        builder.create();
-        builder.show();
+        dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        AlertDialog dialog  = new AlertDialog.Builder(this)
+                .setCancelable(false)
+                .setTitle("Are you sure you want to quit?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        startActivity(new Intent(SinglePlayerActivity.this, StartActivity.class));
+                        finish();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //Resume game
+                        dialog.dismiss();
+                    }
+                })
+                .create();
+
+        dialog.show();
+
     }
 }

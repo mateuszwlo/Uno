@@ -1,5 +1,7 @@
 package com.mateusz.uno.ui.singleplayer;
 
+import android.util.Log;
+
 import com.mateusz.uno.data.AIPlayer;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Card.Colour;
@@ -32,7 +34,7 @@ public class SinglePlayerGame {
     }
 
     //Presenter Methods
-     public void setup() {
+    public void setup() {
 
         //Creating players
         players[0] = new User("Mateusz", mView);
@@ -55,6 +57,8 @@ public class SinglePlayerGame {
                   p.drawCard();
               }
           }
+
+     mView.changeTurnText(players[currentPlayer].getName());
     }
 
     public void play(){
@@ -69,23 +73,32 @@ public class SinglePlayerGame {
             case "plus2":
                 players[getNextPlayer()].drawCard();
                 players[getNextPlayer()].drawCard();
-                changeTurn();
-               break;
+                changeTurn(2);
+                play();
+                return;
             case "skip":
+                changeTurn(2);
+                play();
+                return;
             case "reverse":
+                if(players.length == 2) changeTurn();
                 if(order == 1) order = -1;
                 else order = 1;
-                if(players.length == 2) changeTurn();
-                break;
+                changeTurn();
+                play();
+                return;
             case "wild":
                 players[currentPlayer].changeColour();
                 return;
             case "wildcard":
                 players[currentPlayer].wildCard();
                 return;
+            default:
+                changeTurn();
+                play();
+                break;
         }
-        changeTurn();
-        play();
+
     }
 
     private int getNextPlayer(){
@@ -99,7 +112,7 @@ public class SinglePlayerGame {
     private void checkForWin() {
         for(Player p : players){
             if(p.hasUno()) {
-                mView.showPlayerWinDialog(currentPlayer);
+                mView.showPlayerWinDialog(players[currentPlayer].getName());
                 hasWon = true;
             }
         }
@@ -111,16 +124,19 @@ public class SinglePlayerGame {
     }
 
     private void changeTurn(){
-        currentPlayer = getNextPlayer();
-        mView.changeTurnText(currentPlayer);
+        changeTurn(1);
+    }
+
+    private void changeTurn(int turns){
+
+        for(int i = 0; i < turns; i++){
+            currentPlayer = getNextPlayer();
+        }
+
+        mView.changeTurnText(players[currentPlayer].getName());
     }
 
     public void turn(Card c){
-
-        if(currentPlayer == 0){
-            players[0].turn(c);
-        }
-
         if(c == null) {
             players[currentPlayer].drawCard();
             changeTurn();
@@ -137,6 +153,15 @@ public class SinglePlayerGame {
         }
     }
 
+    public void userTurn(Card c){
+        if(currentPlayer == 0) {
+            players[0].turn(c);
+            changeCurrentCard(c);
+            checkForWin();
+            action(c);
+        }
+    }
+
     public void userDrawCard(){
         if(currentPlayer != 0) return;
         players[0].drawCard();
@@ -147,12 +172,12 @@ public class SinglePlayerGame {
     public void wildCard(Colour c){
         mView.changeColour(c);
 
+        int nextPlayer = getNextPlayer();
         for(int i = 0; i < 4; i++){
-            players[getNextPlayer()].drawCard();
+            players[nextPlayer].drawCard();
         }
 
-        changeTurn();
-        changeTurn();
+        changeTurn(2);
         play();
     }
 

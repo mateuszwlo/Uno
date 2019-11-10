@@ -1,12 +1,13 @@
 package com.mateusz.uno.data;
 
 import android.os.Handler;
+import android.util.Log;
 
 import com.mateusz.uno.ui.singleplayer.SinglePlayerMvpView;
-
 import java.util.ArrayList;
 import java.util.Random;
 
+import static androidx.constraintlayout.widget.Constraints.TAG;
 import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.deck;
 import static com.mateusz.uno.ui.singleplayer.SinglePlayerActivity.game;
 import com.mateusz.uno.data.Card.Colour;
@@ -33,17 +34,16 @@ public class AIPlayer implements Player {
         if (c.getId() == -2) return;
 
         cards.add(c);
-        mView.adjustPlayerCardViews(id, cards.size());
+        mView.addCardView(id, c);
     }
 
     @Override
     public void turn(final Card c) {
-
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+
+        Runnable r = new Runnable() {
             @Override
             public void run() {
-
                 Card playCard = null;
 
                 for (int i = 0; i < cards.size(); i++) {
@@ -56,10 +56,11 @@ public class AIPlayer implements Player {
                     }
                 }
 
-                mView.adjustPlayerCardViews(id, cards.size());
+                if(playCard != null) mView.removeCardView(id, playCard);
                 game.turn(playCard);
             }
-        }, turnTime);
+        };
+        handler.postDelayed(r, turnTime);
     }
 
     @Override
@@ -71,64 +72,50 @@ public class AIPlayer implements Player {
     public void changeColour() {
 
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+
+        Runnable r = new Runnable() {
             @Override
             public void run() {
 
-                Colour col = null;
+                Colour col = Colour.BLUE;
 
-                Random r = new Random();
-                switch (r.nextInt(4)) {
-                    case 0:
-                        col =  Colour.RED;
+                for(int i = 0; i < cards.size(); i++){
+                    if(cards.get(i).getColour() != Colour.BLACK){
+                        col = cards.get(i).getColour();
                         break;
-                    case 1:
-                        col =  Colour.YELLOW;
-                        break;
-                    case 2:
-                        col =  Colour.GREEN;
-                        break;
-                    case 3:
-                    default:
-                        col =  Colour.BLUE;
-                        break;
+                    }
                 }
 
                 game.changeColour(col);
             }
-        }, turnTime);
+        };
+
+        handler.postDelayed(r, turnTime);
     }
 
     @Override
     public void wildCard() {
 
         Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
+
+        Runnable r = new Runnable() {
             @Override
             public void run() {
 
-                Colour col = null;
+                Colour col = Colour.BLUE;
 
-                Random r = new Random();
-                switch (r.nextInt(4)) {
-                    case 0:
-                        col =  Colour.RED;
+                for(int i = 0; i < cards.size(); i++){
+                    if(cards.get(i).getColour() != Colour.BLACK){
+                        col = cards.get(i).getColour();
                         break;
-                    case 1:
-                        col =  Colour.YELLOW;
-                        break;
-                    case 2:
-                        col =  Colour.GREEN;
-                        break;
-                    case 3:
-                    default:
-                        col =  Colour.BLUE;
-                        break;
+                    }
                 }
 
                 game.wildCard(col);
             }
-        }, turnTime);
+        };
+
+        handler.postDelayed(r, turnTime);
     }
 
     @Override

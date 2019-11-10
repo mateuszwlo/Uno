@@ -23,10 +23,10 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline0.4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline0.1" />
+        app:layout_constraintTop_toTopOf="@+id/guideline0.2" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline0.1"
+        android:id="@+id/guideline0.2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"

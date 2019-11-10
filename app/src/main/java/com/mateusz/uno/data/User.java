@@ -17,7 +17,7 @@ public class User implements Player {
     @Override
     public void turn(Card c) {
         if (c.getColour().equals(currentCard.getColour()) || c.getValue().equals(currentCard.getValue()) || c.getColour().equals(Card.Colour.BLACK)) {
-            mView.removeCardView(c.getId());
+            mView.removeCardView(0, c);
         }
     }
 
@@ -34,7 +34,7 @@ public class User implements Player {
             mView.gameDrawDialog();
             return;
         }
-        mView.player1AddCardView(c);
+        mView.addCardView(0, c);
     }
 
     @Override

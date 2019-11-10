@@ -18,7 +18,7 @@ public class SharedPrefsHelper {
 
         SharedPreferences sharedPreferences = ctx.getSharedPreferences(tag, Context.MODE_PRIVATE);
         int id = sharedPreferences.getInt("avatarId", defaultAvatar);
-        String userName = sharedPreferences.getString("userName", "No Name");
+        String userName = sharedPreferences.getString("userName", "");
 
         return new UserData(id, userName);
     }
