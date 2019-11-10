@@ -3,7 +3,7 @@ package com.mateusz.uno.data;
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 
-import com.mateusz.uno.ui.singleplayer.MvpView;
+import com.mateusz.uno.ui.singleplayer.SinglePlayerMvpView;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -15,13 +15,13 @@ public class AIPlayer implements Player {
     private ArrayList<Card> cards;
     private String name;
     private int turnTime = 1000;
-    private MvpView mView;
+    private SinglePlayerMvpView mView;
     private int id;
 
-    public AIPlayer(int id, String name, MvpView mvpView) {
+    public AIPlayer(int id, String name, SinglePlayerMvpView singlePlayerMvpView) {
         this.id = id;
         this.name = name;
-        this.mView = mvpView;
+        this.mView = singlePlayerMvpView;
         cards = new ArrayList<>(0);
     }
 

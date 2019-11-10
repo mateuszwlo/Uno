@@ -9,19 +9,21 @@ import com.mateusz.uno.data.Colour;
 
 public class SinglePlayerGame {
 
-    private MvpView mView;
+    private SinglePlayerMvpView mView;
     public static Card currentCard;
     public static Deck deck;
     private Player[] players;
     private int currentPlayer;
     private int order;
 
-    public SinglePlayerGame(int playerCount, MvpView mView) {
+    public SinglePlayerGame(int playerCount, SinglePlayerMvpView mView) {
         this.mView = mView;
         deck = new Deck();
         players = new Player[playerCount];
         currentPlayer = 0;
         order = 1;
+
+        setup();
     }
 
     //Presenter Methods
@@ -29,7 +31,7 @@ public class SinglePlayerGame {
         //Creating players
         players[0] = new User("Mateusz", mView);
         for(int i = 1; i < players.length; i++){
-            players[i] = new AIPlayer(i, "AI", mView);
+            players[i] = new AIPlayer(i, "AI" + i, mView);
         }
 
         //Picking first card

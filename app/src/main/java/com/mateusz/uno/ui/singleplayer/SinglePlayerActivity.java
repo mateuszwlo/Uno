@@ -5,22 +5,20 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Colour;
 
-import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.deck;
-
-public class SinglePlayerActivity extends AppCompatActivity implements MvpView,View.OnClickListener {
+public class SinglePlayerActivity extends AppCompatActivity implements SinglePlayerMvpView,View.OnClickListener {
 
     private LinearLayout userCards;
     private LinearLayout.LayoutParams cardLayoutParams;
@@ -34,13 +32,11 @@ public class SinglePlayerActivity extends AppCompatActivity implements MvpView,V
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_singleplayer_vertical);
 
-        playerCount = getIntent().getIntExtra("playerCount", 2);
-        game = new SinglePlayerGame(playerCount,this);
-
+        setupBoard();
         initialiseViews();
-        game.setup();
+
+        game = new SinglePlayerGame(playerCount,this);
         game.play();
     }
 
@@ -49,7 +45,7 @@ public class SinglePlayerActivity extends AppCompatActivity implements MvpView,V
                 (int) (100 * getResources().getDisplayMetrics().density),
                 (int) (130 * getResources().getDisplayMetrics().density)
         );
-        cardLayoutParams.leftMargin = (int) (-50 * getResources().getDisplayMetrics().density);
+        cardLayoutParams.leftMargin = (int) (-60 * getResources().getDisplayMetrics().density);
 
         userCards = findViewById(R.id.userCards).findViewById(R.id.userCardsLayout);
 
@@ -67,6 +63,31 @@ public class SinglePlayerActivity extends AppCompatActivity implements MvpView,V
                 game.userDrawCard();
             default:
                 game.userTurn(view.getId());
+                break;
+        }
+    }
+
+    public void setupBoard(){
+
+        playerCount = getIntent().getIntExtra("playerCount", 2);
+
+        if(playerCount == 2){
+            setContentView(R.layout.activity_singleplayer_vertical);
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+        else {
+            setContentView(R.layout.activity_singleplayer_horizontal);
+            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+
+        switch (playerCount){
+            case 4:
+                findViewById(R.id.player2Cards).setVisibility(View.VISIBLE);
+            case 3:
+                findViewById(R.id.player4Cards).setVisibility(View.VISIBLE);
+            case 2:
+            default:
+                findViewById(R.id.player4Cards).setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -182,7 +203,7 @@ public class SinglePlayerActivity extends AppCompatActivity implements MvpView,V
     @Override
     public void adjustPlayerCardViews(int id, int size) {
 
-        LinearLayout cardsLayout = findViewById(getResources().getIdentifier("player" + (id + 1) + "Cards", "id", getPackageName()));
+        RelativeLayout cardsLayout = findViewById(getResources().getIdentifier("player" + (id + 1) + "Cards", "id", getPackageName()));
 
         switch (size){
             case 3:
@@ -232,4 +253,6 @@ public class SinglePlayerActivity extends AppCompatActivity implements MvpView,V
         builder.create();
         builder.show();
     }
+
+
 }

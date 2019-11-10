@@ -35,7 +35,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         switch(v.getId()){
             case R.id.singlePlayerBtn:
                 Intent i = new Intent(this, SinglePlayerActivity.class);
-                i.putExtra("playerCount", 2);
+                i.putExtra("playerCount", 4);
                 startActivity(i);
                 finish();
                 break;

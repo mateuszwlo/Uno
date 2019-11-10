@@ -14,8 +14,8 @@
         app:textAllCaps="true" />
 
     <include
-        android:id="@+id/player2Cards"
-        layout="@layout/ai_player_cards"
+        android:id="@+id/player4Cards"
+        layout="@layout/ai_player_cards_top"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -41,7 +41,7 @@
         android:id="@+id/userCards"
         layout="@layout/user_player_cards"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="wrap_content"
         android:layout_marginTop="120dp" />
 
 </LinearLayout>

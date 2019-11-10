@@ -1,17 +1,17 @@
 package com.mateusz.uno.data;
 
-import com.mateusz.uno.ui.singleplayer.MvpView;
+import com.mateusz.uno.ui.singleplayer.SinglePlayerMvpView;
 import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.deck;
 import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.currentCard;
 
 public class User implements Player {
 
     private String name;
-    private MvpView mView;
+    private SinglePlayerMvpView mView;
 
-    public User(String name, MvpView mvpView) {
+    public User(String name, SinglePlayerMvpView singlePlayerMvpView) {
         this.name = name;
-        this.mView = mvpView;
+        this.mView = singlePlayerMvpView;
     }
 
     @Override
