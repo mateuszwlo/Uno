@@ -3,10 +3,10 @@ package com.mateusz.uno.data;
 public class UserData {
 
     private String name;
-    private int id;
+    private int photoId;
 
-    public UserData(int id, String name) {
-        this.id = id;
+    public UserData(int photoId, String name) {
+        this.photoId = photoId;
         this.name = name;
     }
 
@@ -14,7 +14,7 @@ public class UserData {
         return name;
     }
 
-    public int getId() {
-        return id;
+    public int getPhotoId() {
+        return photoId;
     }
 }

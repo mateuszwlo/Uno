@@ -218,12 +218,11 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
         String tag = "player" + player + "Cards";
 
         if(player == 1){
-            data = new SharedPrefsHelper(this).getUserData();
             tag = "userCards";
         }
 
         ImageView iv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.avatarIv);
-        iv.setImageResource(data.getId());
+        iv.setImageResource(data.getPhotoId());
 
         TextView tv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.nameTv);
         tv.setText(data.getName());
@@ -348,9 +347,10 @@ public class SinglePlayerActivity extends AppCompatActivity implements SinglePla
                 .setPositiveButton("Play Again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        finish();
                         Intent i = new Intent(SinglePlayerActivity.this, SinglePlayerActivity.class);
                         i.putExtra("playerCount", playerCount);
+                        startActivity(i);
+                        finish();
                     }
                 })
                 .setNegativeButton("Exit", new DialogInterface.OnClickListener() {

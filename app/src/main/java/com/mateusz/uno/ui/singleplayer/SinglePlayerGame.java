@@ -1,5 +1,6 @@
 package com.mateusz.uno.ui.singleplayer;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.mateusz.uno.data.AIPlayer;
@@ -7,6 +8,7 @@ import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Card.Colour;
 import com.mateusz.uno.data.Deck;
 import com.mateusz.uno.data.Player;
+import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.User;
 import com.mateusz.uno.data.UserData;
 
@@ -37,8 +39,10 @@ public class SinglePlayerGame {
     public void setup() {
 
         //Creating players
-        players[0] = new User("Mateusz", mView);
-        mView.setupPlayerData(1, null);
+        UserData d = new SharedPrefsHelper((Context) mView).getUserData();
+
+        players[0] = new User(d.getName(), mView);
+        mView.setupPlayerData(1, d);
 
         for(int i = 1; i < players.length; i++){
             UserData data = getRandomData();
@@ -155,10 +159,11 @@ public class SinglePlayerGame {
 
     public void userTurn(Card c){
         if(currentPlayer == 0) {
-            players[0].turn(c);
-            changeCurrentCard(c);
-            checkForWin();
-            action(c);
+            if(players[0].turn(c)){
+                changeCurrentCard(c);
+                checkForWin();
+                action(c);
+            }
         }
     }
 

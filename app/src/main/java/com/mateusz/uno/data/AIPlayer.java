@@ -38,7 +38,7 @@ public class AIPlayer implements Player {
     }
 
     @Override
-    public void turn(final Card c) {
+    public boolean turn(final Card c) {
         Handler handler = new Handler();
 
         Runnable r = new Runnable() {
@@ -61,6 +61,7 @@ public class AIPlayer implements Player {
             }
         };
         handler.postDelayed(r, turnTime);
+        return true;
     }
 
     @Override

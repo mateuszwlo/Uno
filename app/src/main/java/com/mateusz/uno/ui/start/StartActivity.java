@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.UserData;
+import com.mateusz.uno.ui.internetmultiplayer.InternetMultiplayerMenu;
 import com.mateusz.uno.ui.localmultiplayer.LocalMultiplayerMenu;
 import com.mateusz.uno.ui.singleplayer.SinglePlayerActivity;
 
@@ -69,7 +70,8 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
                 finish();
                 break;
             case R.id.internetMultiplayerBtn:
-                Toast.makeText(this, "Internet Multiplayer in Progress!", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(StartActivity.this, InternetMultiplayerMenu.class));
+                finish();
                 break;
             case R.id.avatarIv:
             case R.id.nameTv:

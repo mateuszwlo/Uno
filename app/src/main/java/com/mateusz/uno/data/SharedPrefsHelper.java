@@ -29,7 +29,7 @@ public class SharedPrefsHelper {
         SharedPreferences sharedPreferences = ctx.getSharedPreferences(tag, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putInt("avatarId", data.getId());
+        editor.putInt("avatarId", data.getPhotoId());
         editor.putString("userName", data.getName());
         return editor.commit();
     }

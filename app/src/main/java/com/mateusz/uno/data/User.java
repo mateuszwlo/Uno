@@ -15,10 +15,13 @@ public class User implements Player {
     }
 
     @Override
-    public void turn(Card c) {
+    public boolean turn(Card c) {
         if (c.getColour().equals(currentCard.getColour()) || c.getValue().equals(currentCard.getValue()) || c.getColour().equals(Card.Colour.BLACK)) {
             mView.removeCardView(0, c);
+            return true;
         }
+
+        return false;
     }
 
     @Override
