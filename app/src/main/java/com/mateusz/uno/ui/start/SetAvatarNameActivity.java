@@ -20,6 +20,8 @@ import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.User;
 import com.mateusz.uno.data.UserData;
 
+import java.util.UUID;
+
 public class SetAvatarNameActivity extends AppCompatActivity implements View.OnClickListener {
 
     private int avatarId = 0;
@@ -59,7 +61,13 @@ public class SetAvatarNameActivity extends AppCompatActivity implements View.OnC
                     Toast.makeText(this, "Fields cannot be empty.", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                new SharedPrefsHelper(this).setUserData(new UserData(avatarId, nameEt.getText().toString()));
+
+                //Get existing data and override
+                UserData data = new SharedPrefsHelper(this).getUserData();
+                data.setName(nameEt.getText().toString());
+                data.setPhotoId(avatarId);
+
+                new SharedPrefsHelper(this).setUserData(data);
                 startActivity(new Intent(SetAvatarNameActivity.this, StartActivity.class));
                 finish();
                 break;

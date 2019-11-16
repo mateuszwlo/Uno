@@ -1,6 +1,5 @@
-package com.mateusz.uno.data;
+package com.mateusz.uno.ui.internetmultiplayer;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,15 +9,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.mateusz.uno.R;
+import com.mateusz.uno.data.UserData;
 
 import java.util.ArrayList;
 
 public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameViewHolder> {
 
-    private ArrayList<InternetGame> games;
+    private ArrayList<InternetGameData> games;
 
-    public GameListAdapter(ArrayList<InternetGame> games) {
+    public GameListAdapter(ArrayList<InternetGameData> games) {
         this.games = games;
     }
 
@@ -42,20 +45,15 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameVi
     }
 
     public class GameViewHolder extends RecyclerView.ViewHolder{
-        private ImageView gameIv;
         private TextView gameNameTv, gameAvailability;
 
         public GameViewHolder(@NonNull View itemView) {
             super(itemView);
-            gameIv = itemView.findViewById(R.id.gameIv);
             gameNameTv = itemView.findViewById(R.id.gameNameTv);
             gameAvailability = itemView.findViewById(R.id.gameAvailability);
         }
 
-        public void bindGame(InternetGame game){
-            //Get image of first player(Player who started game)
-            gameIv.setImageResource(game.getPlayers().get(0).getPhotoId());
-
+        public void bindGame(InternetGameData game){
             //Get name of first player
             gameNameTv.setText(game.getName());
 

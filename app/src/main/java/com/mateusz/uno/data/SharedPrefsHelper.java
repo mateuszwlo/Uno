@@ -17,10 +17,12 @@ public class SharedPrefsHelper {
         int defaultAvatar = ctx.getResources().getIdentifier("avatar_1", "drawable", ctx.getPackageName());
 
         SharedPreferences sharedPreferences = ctx.getSharedPreferences(tag, Context.MODE_PRIVATE);
-        int id = sharedPreferences.getInt("avatarId", defaultAvatar);
-        String userName = sharedPreferences.getString("userName", "");
 
-        return new UserData(id, userName);
+        String id = sharedPreferences.getString("id", null);
+        int photoId = sharedPreferences.getInt("avatarId", defaultAvatar);
+        String userName = sharedPreferences.getString("userName", null);
+
+        return new UserData(id, photoId, userName);
     }
 
     public boolean setUserData(UserData data){
@@ -29,6 +31,7 @@ public class SharedPrefsHelper {
         SharedPreferences sharedPreferences = ctx.getSharedPreferences(tag, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
+        editor.putString("id", data.getId());
         editor.putInt("avatarId", data.getPhotoId());
         editor.putString("userName", data.getName());
         return editor.commit();

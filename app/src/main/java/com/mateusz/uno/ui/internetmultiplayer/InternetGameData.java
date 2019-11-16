@@ -1,22 +1,23 @@
-package com.mateusz.uno.data;
+package com.mateusz.uno.ui.internetmultiplayer;
 
 import com.google.firebase.firestore.Exclude;
+import com.mateusz.uno.data.UserData;
 
 import java.util.ArrayList;
 
-public class InternetGame {
+public class InternetGameData {
 
     private String id;
     private String name;
     private int currentCard;
     private int playerCount;
-    private ArrayList<InternetPlayer> players;
+    private ArrayList<String> players;
 
-    public InternetGame(){
+    public InternetGameData(){
         //No Argument Constructor
     }
 
-    public InternetGame(String name, int currentCard, int playerCount) {
+    public InternetGameData(String name, int currentCard, int playerCount) {
         this.name = name;
         this.currentCard = currentCard;
         this.playerCount = playerCount;
@@ -27,7 +28,7 @@ public class InternetGame {
         this.currentCard = currentCard;
     }
 
-    public void addPlayer(InternetPlayer player){
+    public void addPlayer(String player){
         if(players.size() != playerCount) players.add(player);
     }
 
@@ -39,7 +40,7 @@ public class InternetGame {
         return playerCount;
     }
 
-    public ArrayList<InternetPlayer> getPlayers() {
+    public ArrayList<String> getPlayers() {
         return players;
     }
 

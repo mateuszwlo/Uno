@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp"
+    tools:context=".ui.internetmultiplayer.CreateInternetGameActivity">
+
+    <EditText
+        android:id="@+id/gameNameEt"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:ems="10"
+        android:gravity="center_horizontal"
+        android:hint="Game Name"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/radioGroup"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gameNameEt">
+
+        <RadioButton
+            android:id="@+id/twoPlayerRBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="#F44336"
+            android:checked="true"
+            android:text="2 Player" />
+
+        <RadioButton
+            android:id="@+id/threePlayerRBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="#F44336"
+            android:text="3 Player" />
+
+        <RadioButton
+            android:id="@+id/fourPlayerRBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:buttonTint="#F44336"
+            android:text="4 Player" />
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/createGameBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Create Game"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+</androidx.constraintlayout.widget.ConstraintLayout>

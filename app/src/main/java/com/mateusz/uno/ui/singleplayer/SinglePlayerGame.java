@@ -196,7 +196,7 @@ public class SinglePlayerGame {
         int i = new Random().nextInt(names.length - 1) + 1;
         int avatar = mView.getAvatarResource(i + 1);
 
-        return new UserData(avatar, names[i]);
+        return new UserData("", avatar, names[i]);
 
     }
 }

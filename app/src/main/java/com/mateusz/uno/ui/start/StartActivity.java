@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mateusz.uno.R;
+import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 import com.mateusz.uno.ui.internetmultiplayer.InternetMultiplayerMenu;
 import com.mateusz.uno.ui.localmultiplayer.LocalMultiplayerMenu;
@@ -94,17 +95,15 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void getSharedPrefs(){
-        SharedPreferences sharedPreferences = this.getSharedPreferences("com.mateusz.uno.userData", Context.MODE_PRIVATE);
-        int id = sharedPreferences.getInt("avatarId", defaultAvatar);
-        String userName = sharedPreferences.getString("userName", null);
+        UserData data = new SharedPrefsHelper(this).getUserData();
 
-        if(userName == null){
+        if(data.getName() == null){
             startActivity(new Intent(StartActivity.this, SetAvatarNameActivity.class));
             finish();
         }
 
-        avatarIv.setImageResource(id);
-        userNameTv.setText(userName);
+        avatarIv.setImageResource(data.getPhotoId());
+        userNameTv.setText(data.getName());
     }
 
     private void showPlayerNumberDialog(){
