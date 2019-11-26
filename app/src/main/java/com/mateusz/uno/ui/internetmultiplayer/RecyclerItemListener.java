@@ -1,4 +1,4 @@
-package com.mateusz.uno.data;
+package com.mateusz.uno.ui.internetmultiplayer;
 
 import android.content.Context;
 import android.view.GestureDetector;
@@ -8,7 +8,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class RecylerItemListener implements RecyclerView.OnItemTouchListener {
+public class RecyclerItemListener implements RecyclerView.OnItemTouchListener {
 
     private RecyclerTouchListener listener;
     private GestureDetector gd;
@@ -18,7 +18,7 @@ public class RecylerItemListener implements RecyclerView.OnItemTouchListener {
         void onLongClickItem(View v, int position);
     }
 
-    public RecylerItemListener(Context ctx, final RecyclerView rv, final RecyclerTouchListener listener) {
+    public RecyclerItemListener(Context ctx, final RecyclerView rv, final RecyclerTouchListener listener) {
         this.listener = listener;
 
         gd = new GestureDetector(ctx, new GestureDetector.SimpleOnGestureListener(){

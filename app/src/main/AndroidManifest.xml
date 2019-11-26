@@ -14,12 +14,13 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".ui.internetmultiplayer.CreateInternetGameActivity"></activity>
+        <activity android:name=".ui.internetmultiplayer.InternetGameActivity"></activity>
+        <activity android:name=".ui.internetmultiplayer.CreateInternetGameActivity" />
         <activity android:name=".ui.internetmultiplayer.InternetGameLoadingActivity" />
         <activity android:name=".ui.internetmultiplayer.InternetMultiplayerMenu" />
         <activity android:name=".ui.localmultiplayer.LocalMultiplayerMenu" />
         <activity android:name=".ui.start.SetAvatarNameActivity" />
-        <activity android:name=".ui.singleplayer.SinglePlayerActivity" />
+        <activity android:name=".ui.singleplayer.SinglePlayerGameActivity" />
         <activity android:name=".ui.start.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

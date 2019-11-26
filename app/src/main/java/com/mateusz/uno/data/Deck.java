@@ -1,5 +1,7 @@
 package com.mateusz.uno.data;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Random;
 import com.mateusz.uno.data.Card.Colour;
@@ -19,12 +21,6 @@ public class Deck {
             return new Card(-2, null, null);
         }
 
-        //RED = 25/108 -> 1-9 = 2/25, 0 = 1/25
-        //BLUE = 25/108
-        //GREEN = 25/108
-        //YELLOW = 25/108
-        //BLACK = 8/108 -> Wild = 1/2, WildCard = 1/2
-
         int r = new Random().nextInt(deck.size());
 
         Card c  = deck.get(r);
@@ -41,7 +37,6 @@ public class Deck {
     }
 
     public Card fetchCard(int no){
-
         Colour col;
         String value;
 
@@ -112,5 +107,9 @@ public class Deck {
             c = getRandomCard();
         }
         return c;
+    }
+
+    public void removeCard(Card c){
+        deck.remove(c);
     }
 }

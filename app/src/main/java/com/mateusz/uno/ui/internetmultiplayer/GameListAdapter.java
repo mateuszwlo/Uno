@@ -3,17 +3,13 @@ package com.mateusz.uno.ui.internetmultiplayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.UserData;
+import com.mateusz.uno.data.InternetGameData;
 
 import java.util.ArrayList;
 

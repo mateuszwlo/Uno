@@ -10,21 +10,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mateusz.uno.R;
+import com.mateusz.uno.data.InternetGameData;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class CreateInternetGameActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -76,7 +72,7 @@ public class CreateInternetGameActivity extends AppCompatActivity implements Vie
     private void createGame(String name, int playerCount) {
         UserData data =  new SharedPrefsHelper(this).getUserData();
 
-        InternetGameData game = new InternetGameData(name, 108, playerCount);
+        InternetGameData game = new InternetGameData(name, 0, playerCount);
         game.addPlayer(data.getId());
 
         gamesDb.add(game)

@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.internetmultiplayer;
+package com.mateusz.uno.data;
 
 import com.google.firebase.firestore.Exclude;
 import com.mateusz.uno.data.UserData;
@@ -55,5 +55,9 @@ public class InternetGameData {
 
     public String getName() {
         return name;
+    }
+
+    public void setPlayerList(ArrayList<String> players) {
+        this.players = players;
     }
 }

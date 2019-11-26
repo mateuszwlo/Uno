@@ -3,23 +3,20 @@ package com.mateusz.uno.ui.start;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 import com.mateusz.uno.ui.internetmultiplayer.InternetMultiplayerMenu;
 import com.mateusz.uno.ui.localmultiplayer.LocalMultiplayerMenu;
-import com.mateusz.uno.ui.singleplayer.SinglePlayerActivity;
+import com.mateusz.uno.ui.singleplayer.SinglePlayerGameActivity;
 
 public class StartActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -128,7 +125,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void startGame(int players){
-        Intent i = new Intent(StartActivity.this, SinglePlayerActivity.class);
+        Intent i = new Intent(StartActivity.this, SinglePlayerGameActivity.class);
         i.putExtra("playerCount", players);
         startActivity(i);
         finish();

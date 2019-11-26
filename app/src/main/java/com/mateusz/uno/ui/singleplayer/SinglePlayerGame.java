@@ -1,7 +1,6 @@
 package com.mateusz.uno.ui.singleplayer;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.mateusz.uno.data.AIPlayer;
 import com.mateusz.uno.data.Card;
@@ -18,7 +17,7 @@ public class SinglePlayerGame {
 
     private SinglePlayerMvpView mView;
     public static Card currentCard;
-    public static Deck deck;
+    public Deck deck;
     private Player[] players;
     private int currentPlayer;
     private int order;
@@ -41,12 +40,12 @@ public class SinglePlayerGame {
         //Creating players
         UserData d = new SharedPrefsHelper((Context) mView).getUserData();
 
-        players[0] = new User(d.getName(), mView);
+        players[0] = new User(deck, d.getName(), mView);
         mView.setupPlayerData(1, d);
 
         for(int i = 1; i < players.length; i++){
             UserData data = getRandomData();
-            players[i] = new AIPlayer(i, data.getName(), mView);
+            players[i] = new AIPlayer(deck, i, data.getName(), mView);
 
             //Setting player data
             mView.setupPlayerData(i + 1, data);
@@ -198,5 +197,9 @@ public class SinglePlayerGame {
 
         return new UserData("", avatar, names[i]);
 
+    }
+
+    public Deck getDeck() {
+        return deck;
     }
 }

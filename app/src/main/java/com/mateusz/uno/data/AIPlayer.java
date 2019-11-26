@@ -1,15 +1,10 @@
 package com.mateusz.uno.data;
 
 import android.os.Handler;
-import android.util.Log;
 
 import com.mateusz.uno.ui.singleplayer.SinglePlayerMvpView;
 import java.util.ArrayList;
-import java.util.Random;
-
-import static androidx.constraintlayout.widget.Constraints.TAG;
-import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.deck;
-import static com.mateusz.uno.ui.singleplayer.SinglePlayerActivity.game;
+import static com.mateusz.uno.ui.singleplayer.SinglePlayerGameActivity.game;
 import com.mateusz.uno.data.Card.Colour;
 
 public class AIPlayer implements Player {
@@ -19,8 +14,10 @@ public class AIPlayer implements Player {
     private int turnTime = 1000;
     private SinglePlayerMvpView mView;
     private int id;
+    private Deck deck;
 
-    public AIPlayer(int id, String name, SinglePlayerMvpView singlePlayerMvpView) {
+    public AIPlayer(Deck deck, int id, String name, SinglePlayerMvpView singlePlayerMvpView) {
+        this.deck = deck;
         this.id = id;
         this.name = name;
         this.mView = singlePlayerMvpView;
