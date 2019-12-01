@@ -53,7 +53,7 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameVi
             //Get name of first player
             gameNameTv.setText(game.getName());
 
-            String availability = game.getPlayers().size() + "/" + game.getPlayerCount();
+            String availability = game.getPlayerList().size() + "/" + game.getPlayerCount();
             gameAvailability.setText(availability);
         }
     }

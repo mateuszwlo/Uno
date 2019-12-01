@@ -79,18 +79,9 @@ public class CreateInternetGameActivity extends AppCompatActivity implements Vie
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        Log.d("DATABASE", "Added with ID: "+ documentReference.getId());
                         openGame(documentReference.getId());
                     }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w("DATABASE", "Error adding document", e);
-                    }
                 });
-
-
     }
 
     private void openGame(String id) {

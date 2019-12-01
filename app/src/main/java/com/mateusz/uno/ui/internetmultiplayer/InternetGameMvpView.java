@@ -3,15 +3,17 @@ package com.mateusz.uno.ui.internetmultiplayer;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.UserData;
 
-interface InternetGameMvpView {
+import java.util.List;
+
+public interface InternetGameMvpView {
     //User cards
     void addCardView(int player, Card c);
     void removeCardView(int player, Card c);
-    int getPlayer1CardCount();
+    void updateCardViews(int player, List<Integer> cards);
+    int getPlayerCardCount(int player);
 
     //Game
     void changeCurrentCardView(int id);
-    void changeColour(Card.Colour col);
     void changeTurnText(String player);
     void setupPlayerData(int player, UserData data);
 
@@ -23,4 +25,5 @@ interface InternetGameMvpView {
     void gameDrawDialog();
     void showColourPickerDialog();
     void showWildCardColourPickerDialog();
+    void hideLoadingGameDialog();
 }

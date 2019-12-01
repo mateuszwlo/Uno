@@ -9,9 +9,9 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -19,11 +19,11 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.InternetGameData;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
-import com.mateusz.uno.ui.singleplayer.SinglePlayerGameActivity;
 
 import java.util.ArrayList;
 
@@ -39,12 +39,13 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private UserData userData;
     private boolean hasJoinedGame = false;
+    private ListenerRegistration registration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_internet_game_loading);
-        Log.d("LOADING", "onCreate: LOADING SCREEN");
+
         initialiseViews();
         getGameId();
 
@@ -68,10 +69,8 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
 
         if (gameId == null) getGameId();
 
-        FirebaseFirestore.getInstance()
-                .collection("games")
-                .document(gameId)
-                .addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+        registration = FirebaseFirestore.getInstance().collection("games").document(gameId)
+                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
                     @Override
                     public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
 
@@ -79,32 +78,22 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
 
                         gameNameTv.setText(gameData.getName());
 
-                        if (gameData.getPlayerCount() == gameData.getPlayers().size()) {
-                            Log.d("GAME", "startGame: STARTING GAME");
-                            hasJoinedGame = true;
+                        if (gameData.getPlayerCount() == gameData.getPlayerList().size()) startGame(gameData.getPlayerCount());
 
-                            Intent i = new Intent(InternetGameLoadingActivity.this, InternetGameActivity.class);
-                            i.putExtra("gameId", gameId);
-                            i.putExtra("playerCount", gameData.getPlayerCount());
-                            startActivity(i);
-                            finish();
-                            return;
-                        } else {
-                            //Update Player List
-                            for (String id : gameData.getPlayers()) {
-                                usersDb.document(id)
-                                        .get()
-                                        .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                            @Override
-                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                UserData data = documentSnapshot.toObject(UserData.class);
-
-                                                if(!connectedPlayers.contains(data.getName())) connectedPlayers.add(data.getName());
-                                                adapter.notifyDataSetChanged();
-                                            }
-                                        });
-                                adapter.notifyDataSetChanged();
-                            }
+                        //Update Player List
+                        for (String id : gameData.getPlayerList()) {
+                            usersDb.document(id)
+                                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    UserData data = documentSnapshot.toObject(UserData.class);
+                                    if (!connectedPlayers.contains(data.getName())) {
+                                        connectedPlayers.add(data.getName());
+                                        adapter.notifyDataSetChanged();
+                                    }
+                                }
+                            });
+                            adapter.notifyDataSetChanged();
                         }
                     }
                 });
@@ -124,7 +113,7 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 InternetGameData data = documentSnapshot.toObject(InternetGameData.class);
-                if (data.getPlayers() == null || data.getPlayers().size() == 0) {
+                if (data.getPlayerList() == null || data.getPlayerList().size() == 0) {
                     gameRef.delete();
                 }
             }
@@ -146,5 +135,15 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
         finish();
     }
 
+    private void startGame(int playerCount) {
+        registration.remove();
 
+        hasJoinedGame = true;
+
+        Intent i = new Intent(InternetGameLoadingActivity.this, InternetGameActivity.class);
+        i.putExtra("gameId", gameId);
+        i.putExtra("playerCount", playerCount);
+        startActivity(i);
+        finish();
+    }
 }

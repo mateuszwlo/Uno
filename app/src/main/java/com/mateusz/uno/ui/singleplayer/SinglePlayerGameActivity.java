@@ -32,6 +32,7 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
     public static SinglePlayerGame game;
     private int playerCount;
     private HorizontalScrollView.LayoutParams scrollViewParams;
+    LinearLayout.LayoutParams cardParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +61,13 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
                 HorizontalScrollView.LayoutParams.MATCH_PARENT,
                 HorizontalScrollView.LayoutParams.MATCH_PARENT
         );
+
+        cardParams = new LinearLayout.LayoutParams(
+                (int) (100 * getResources().getDisplayMetrics().density),
+                LinearLayout.LayoutParams.MATCH_PARENT);
+
+        cardParams.leftMargin = (int) (-60 * getResources().getDisplayMetrics().density);
+        cardParams.weight = 0;
     }
 
     @Override
@@ -140,30 +148,7 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
 
     public LinearLayout.LayoutParams getUserCardParams() {
 
-        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
-                (int) (100 * getResources().getDisplayMetrics().density),
-                LinearLayout.LayoutParams.MATCH_PARENT);
-
         LinearLayout l = userCards.findViewById(R.id.userCardsLayout);
-
-        //Decreasing or increasing left margins for all cards
-        int leftMargin = (int) (-60 * getResources().getDisplayMetrics().density);
-
-        cardParams.leftMargin = leftMargin;
-        cardParams.weight = 0;
-
-        //Setting margins for each card in the layout
-        for (int i = 0; i < l.getChildCount(); i++) {
-            if (l.getChildAt(i).getId() != R.id.placeholderCard)
-                l.getChildAt(i).setLayoutParams(cardParams);
-        }
-
-        //Adjusting width of placeholder for accommodate new left margin
-        LinearLayout.LayoutParams placeholderParams = new LinearLayout.LayoutParams(
-                leftMargin * -1,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-
-        l.findViewById(R.id.placeholderCard).setLayoutParams(placeholderParams);
 
         if (l.getChildCount() < 7) scrollViewParams.gravity = Gravity.CENTER_HORIZONTAL;
         else scrollViewParams.gravity = Gravity.START;

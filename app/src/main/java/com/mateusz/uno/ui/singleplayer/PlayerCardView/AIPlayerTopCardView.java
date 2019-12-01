@@ -44,6 +44,8 @@ public class AIPlayerTopCardView extends AIPlayerCardView{
                 margin * -1,
                 LinearLayout.LayoutParams.MATCH_PARENT);
 
+        if(this.findViewById(R.id.placeholderCard) == null) return cardParams;
+
         this.findViewById(R.id.placeholderCard).setLayoutParams(placeholderParams);
         return cardParams;
     }

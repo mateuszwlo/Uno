@@ -8,24 +8,24 @@ import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.mateusz.uno.data.AIPlayer;
+import com.google.firebase.firestore.Transaction;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Deck;
 import com.mateusz.uno.data.InternetGameData;
-import com.mateusz.uno.data.Player;
 import com.mateusz.uno.data.SharedPrefsHelper;
-import com.mateusz.uno.data.User;
 import com.mateusz.uno.data.UserData;
 
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.mateusz.uno.ui.internetmultiplayer.InternetGameActivity.gameRef;
 import static com.mateusz.uno.ui.internetmultiplayer.InternetGameActivity.usersDb;
@@ -35,19 +35,20 @@ public class InternetGame {
     private InternetGameMvpView mView;
     public static Card currentCard;
     public static Deck deck;
-    private Player[] players;
+    private UserData[] players;
     private int currentPlayer;
     private int order;
     private boolean hasWon = false;
     private String gameId;
     private String[] userIds;
     private int index;
+    public static boolean ready = false;
 
     public InternetGame(String gameId, int playerCount, InternetGameMvpView mView) {
         this.gameId = gameId;
         this.mView = mView;
         deck = new Deck();
-        players = new Player[playerCount];
+        players = new UserData[playerCount];
         userIds = new String[playerCount];
         currentPlayer = 0;
         order = 1;
@@ -55,198 +56,264 @@ public class InternetGame {
 
     //Presenter Methods
     public void setup() {
-        Log.d("SETUP", "setup: SETUP");
+
         final UserData userData = new SharedPrefsHelper((Context) mView).getUserData();
 
-        //Setting first card
         gameRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                InternetGameData gameData = documentSnapshot.toObject(InternetGameData.class);
-                final ArrayList<String> playerList = gameData.getPlayers();
+                final InternetGameData gameData = documentSnapshot.toObject(InternetGameData.class);
 
-                for(int i = 0; i < playerList.size(); i++){
-                    userIds[i] = playerList.get(i);
+                gameData.getPlayerList().toArray(userIds);
+                Arrays.sort(userIds);
 
-                    if(playerList.get(i).equals(userData.getId())) index = i;
+                for (int i = 0; i < userIds.length; i++) {
+                    if (userIds[i].equals(userData.getId())) {
+                        index = i;
+                        break;
+                    }
 
                 }
-
                 adjustUserOrder();
 
-                //Setting user Data
-                for(int i = 0; i < userIds.length; i++){
+                for (int i = 0; i < userIds.length; i++) {
                     final int finalI = i;
                     usersDb.document(userIds[i]).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                         @Override
                         public void onSuccess(DocumentSnapshot documentSnapshot) {
                             UserData data = documentSnapshot.toObject(UserData.class);
+
                             mView.setupPlayerData(finalI + 1, data);
+                            players[finalI] = data;
 
-                            for(int i = 0; i < userIds.length; i++){
-                                players[i] = new InternetPlayer(i, data.getName(), playerList.get(i), mView);
+                            if (isListFull(players)) {
+                                playerDrawCard(0, 7);
+                                mView.hideLoadingGameDialog();
+                                updateVariables(gameData);
+                                ready = true;
+
+                                //if(players[getNewOrder(0)].getId().equals(userData.getId())) changeCurrentCard(deck.drawFirstCard());
                             }
-
-                            //Each player draws 7 cards
-                            for(int j = 0; j < 7; j++) players[finalI].drawCard();
                         }
                     });
                 }
+
+                gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                        InternetGameData newGameData = documentSnapshot.toObject(InternetGameData.class);
+
+                        if (!ready || hasWon) return;
+                        if (gameData.getPlayers().size() == 1) return;
+
+                        updateVariables(newGameData);
+
+                        for (int i = 0; i < userIds.length; i++) {
+                            List<Integer> playerCards = newGameData.getPlayers().get(userIds[i]);
+                            mView.updateCardViews(i, playerCards);
+
+                            for (int j = 0; j < playerCards.size(); j++) {
+                                if (deck.contains(deck.fetchCard(j)))
+                                    deck.removeCard(deck.fetchCard(j));
+                            }
+                        }
+                    }
+                });
+
             }
         });
+    }
 
+    private boolean isListFull(UserData[] players) {
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] == null) return false;
+        }
 
-        //Changes card as database changes
-        gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                InternetGameData gameData = documentSnapshot.toObject(InternetGameData.class);
+        return true;
+    }
 
-                mView.changeCurrentCardView(gameData.getCurrentCard());
-                currentCard = deck.fetchCard(gameData.getCurrentCard());
-                deck.removeCard(currentCard);
-            }
-        });
+    private int getNewOrder(int i) {
+        int position = i - index;
+        if (position < 0) position += userIds.length;
 
-        //mView.changeTurnText(players[currentPlayer].getName());
-        play();
+        return position;
+    }
+
+    private int getOldOrder(int i) {
+        int position = i + index;
+        if (position > userIds.length - 1) position -= userIds.length;
+
+        return position;
     }
 
     private void adjustUserOrder() {
         String temp;
         int position;
 
-        for(int i = 0; i < Math.ceil(userIds.length / 2.0); i++){
-            position = i - index;
-            if(position < 0) position += userIds.length;
+        for (int i = 0; i < Math.ceil(userIds.length / 2.0); i++) {
+            position = getNewOrder(i);
 
             temp = userIds[position];
             userIds[position] = userIds[i];
             userIds[i] = temp;
         }
 
-        currentPlayer = index;
+        currentPlayer = getNewOrder(0);
     }
 
-    public void play(){
-        if(currentPlayer == 0) return;
+    private void updateVariables(InternetGameData gameData) {
+
+        //Change Card
+        mView.changeCurrentCardView(gameData.getCurrentCard());
+        currentCard = deck.fetchCard(gameData.getCurrentCard());
+        deck.removeCard(currentCard);
+
+        //Change player
+        currentPlayer = getNewOrder(gameData.getCurrentPlayer());
+        mView.changeTurnText(players[currentPlayer].getName());
+    }
+
+    private int getNextPlayer() {
+        int next = currentPlayer + order;
+
+        if (next == -1) return players.length - 1;
+        else if (next == players.length) return 0;
+        else return next;
     }
 
     private void action(Card c) {
-        if(hasWon) return;
+        if (hasWon) return;
 
         switch (c.getValue()) {
             case "plus2":
-                players[getNextPlayer()].drawCard();
-                players[getNextPlayer()].drawCard();
+                playerDrawCard(getNextPlayer());
+                playerDrawCard(getNextPlayer());
                 changeTurn(2);
-                play();
                 return;
             case "skip":
                 changeTurn(2);
-                play();
                 return;
             case "reverse":
-                if(players.length == 2) changeTurn();
-                if(order == 1) order = -1;
+                if (players.length == 2) changeTurn();
+                if (order == 1) order = -1;
                 else order = 1;
                 changeTurn();
-                play();
                 return;
             case "wild":
-                players[currentPlayer].changeColour();
+                mView.showColourPickerDialog();
+                changeTurn();
                 return;
             case "wildcard":
-                players[currentPlayer].wildCard();
+                mView.showWildCardColourPickerDialog();
+                changeTurn(2);
                 return;
             default:
                 changeTurn();
-                play();
                 break;
         }
 
     }
 
-    private int getNextPlayer(){
-        int next = currentPlayer + order;
-
-        if(next == -1) return players.length - 1;
-        else if(next  == players.length) return 0;
-        else return next;
-    }
-
     private void checkForWin() {
-        for(Player p : players){
-            if(p.hasUno()) {
-                mView.showPlayerWinDialog(players[currentPlayer].getName());
+        for (int i = 0; i < players.length; i++) {
+            if (mView.getPlayerCardCount(i) == 0) {
+                mView.showPlayerWinDialog(players[i].getName());
                 hasWon = true;
             }
         }
     }
 
-    public void changeCurrentCard(Card c){
+    public void changeCurrentCard(Card c) {
         currentCard = c;
         mView.changeCurrentCardView(c.getId());
         gameRef.update("currentCard", c.getId());
     }
 
-    private void changeTurn(){
+    private void changeTurn() {
         changeTurn(1);
     }
 
-    private void changeTurn(int turns){
+    private void changeTurn(int turns) {
 
-        for(int i = 0; i < turns; i++){
+        for (int i = 0; i < turns; i++) {
             currentPlayer = getNextPlayer();
         }
 
         mView.changeTurnText(players[currentPlayer].getName());
+        gameRef.update("currentPlayer", getOldOrder(currentPlayer));
     }
 
-    public void turn(Card c){
-        if(c == null) {
-            players[currentPlayer].drawCard();
-            changeTurn();
-            play();
-        }
-        else if(c.getId() == -2){
+    public void userTurn(Card c) {
+        if (currentPlayer != 0) return;
+        if (!(c.getColour().equals(currentCard.getColour()) || c.getValue().equals(currentCard.getValue()) || c.getColour().equals(Card.Colour.BLACK)))
+            return;
+
+        //Actions
+        if (c.getId() == -2) {
             //All cards in deck played
             mView.gameDrawDialog();
-        }
-        else{
+        } else {
             changeCurrentCard(c);
+            playerRemoveCard(0, c);
             checkForWin();
             action(c);
         }
     }
 
-    public void userTurn(Card c){
-        if(currentPlayer != 0) return;
-        if(players[0].turn(c)) turn(c);
-    }
-
-    public void userDrawCard(){
-        if(currentPlayer != 0) return;
-        players[0].drawCard();
+    public void userDrawCard() {
+        if (currentPlayer != 0) return;
+        playerDrawCard(0);
         changeTurn();
-        play();
     }
 
-    public void wildCard(Card.Colour c){
-        mView.changeColour(c);
+    public void wildCard() {
+        int nextPlayer = getOldOrder(getNextPlayer());
+        playerDrawCard(nextPlayer, 4);
+    }
 
-        int nextPlayer = getNextPlayer();
-        for(int i = 0; i < 4; i++){
-            players[nextPlayer].drawCard();
+    private void playerDrawCard(int player) {
+        playerDrawCard(player, 1);
+    }
+
+    private void playerDrawCard(final int player, final int num) {
+
+        final ArrayList<Integer> cards = new ArrayList<>(0);
+
+        for(int i = 0; i < num; i++) {
+            Card c = deck.getRandomCard();
+            cards.add(c.getId());
+            mView.addCardView(player, c);
         }
 
-        changeTurn(2);
-        play();
+        FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<Void>() {
+            @Nullable
+            @Override
+            public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                Map<String, List<Integer>> playerMap = transaction.get(gameRef).toObject(InternetGameData.class).getPlayers();
+
+                for (int c : cards) {
+                    playerMap.get(userIds[player]).add(c);
+                }
+
+                transaction.update(gameRef, "players", playerMap);
+                return null;
+            }
+        });
     }
 
-    public void changeColour(Card.Colour c){
-        mView.changeColour(c);
-        changeTurn();
-        play();
+    private void playerRemoveCard(final int player, final Card c) {
+        mView.removeCardView(player, c);
+
+        FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<Void>() {
+            @Nullable
+            @Override
+            public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                Map<String, List<Integer>> playerMap = transaction.get(gameRef).toObject(InternetGameData.class).getPlayers();
+
+                playerMap.get(userIds[player]).remove(Integer.valueOf(c.getId()));
+                transaction.update(gameRef, "players", playerMap);
+                return null;
+            }
+        });
     }
 }

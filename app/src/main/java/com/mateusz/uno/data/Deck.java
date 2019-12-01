@@ -40,6 +40,19 @@ public class Deck {
         Colour col;
         String value;
 
+        switch (no){
+            case 108:
+                return new Card(no, Colour.BLACK, "BACK");
+            case 109:
+                return new Card(no, Colour.RED, "SOLID");
+            case 110:
+                return new Card(no, Colour.YELLOW, "SOLID");
+            case 111:
+                return new Card(no, Colour.GREEN, "SOLID");
+            case 112:
+                return new Card(no, Colour.BLUE, "SOLID");
+        }
+
         //Get Colour
         int i = no / 25;
 
@@ -110,6 +123,10 @@ public class Deck {
     }
 
     public void removeCard(Card c){
-        deck.remove(c);
+        if(deck.contains(c)) deck.remove(c);
+    }
+
+    public boolean contains(Card c){
+        return deck.contains(c);
     }
 }
