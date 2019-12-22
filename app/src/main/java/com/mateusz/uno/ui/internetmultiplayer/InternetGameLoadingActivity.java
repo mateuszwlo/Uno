@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -20,6 +22,8 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.InternetGameData;
 import com.mateusz.uno.data.SharedPrefsHelper;
@@ -39,7 +43,7 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
     private ArrayAdapter<String> adapter;
     private UserData userData;
     private boolean hasJoinedGame = false;
-    private ListenerRegistration registration;
+    private InternetGameData gameData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,20 +73,37 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
 
         if (gameId == null) getGameId();
 
-        registration = FirebaseFirestore.getInstance().collection("games").document(gameId)
-                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            FirebaseAuth.getInstance().signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    setUpListener();
+                }
+            });
+        } else {
+            setUpListener();
+        }
+    }
+
+    private void setUpListener() {
+        gameRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                gameData = documentSnapshot.toObject(InternetGameData.class);
+
+                gameNameTv.setText(gameData.getName());
+
+                gameRef.collection("players").addSnapshotListener(InternetGameLoadingActivity.this, new EventListener<QuerySnapshot>() {
                     @Override
-                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
 
-                        final InternetGameData gameData = documentSnapshot.toObject(InternetGameData.class);
 
-                        gameNameTv.setText(gameData.getName());
-
-                        if (gameData.getPlayerCount() == gameData.getPlayerList().size()) startGame(gameData.getPlayerCount());
+                        if (gameData.getPlayerCount() == queryDocumentSnapshots.size())
+                            startGame(gameData.getPlayerCount());
 
                         //Update Player List
-                        for (String id : gameData.getPlayerList()) {
-                            usersDb.document(id)
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            usersDb.document(doc.getId())
                                     .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -97,6 +118,9 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
                         }
                     }
                 });
+            }
+        });
+
     }
 
     private void getGameId() {
@@ -109,11 +133,10 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
     }
 
     private void checkIfPlayersLeft() {
-        gameRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        gameRef.collection("players").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                InternetGameData data = documentSnapshot.toObject(InternetGameData.class);
-                if (data.getPlayerList() == null || data.getPlayerList().size() == 0) {
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if (queryDocumentSnapshots == null || queryDocumentSnapshots.size() == 0) {
                     gameRef.delete();
                 }
             }
@@ -123,7 +146,7 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         if (!hasJoinedGame) {
-            gameRef.update("players", FieldValue.arrayRemove(userData.getId()));
+            gameRef.collection("players").document(userData.getId()).delete();
             checkIfPlayersLeft();
         }
         super.onDestroy();
@@ -136,8 +159,6 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
     }
 
     private void startGame(int playerCount) {
-        registration.remove();
-
         hasJoinedGame = true;
 
         Intent i = new Intent(InternetGameLoadingActivity.this, InternetGameActivity.class);

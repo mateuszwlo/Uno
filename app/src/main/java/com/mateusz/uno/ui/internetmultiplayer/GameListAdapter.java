@@ -6,8 +6,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.InternetGameData;
 
@@ -49,12 +55,20 @@ public class GameListAdapter extends RecyclerView.Adapter<GameListAdapter.GameVi
             gameAvailability = itemView.findViewById(R.id.gameAvailability);
         }
 
-        public void bindGame(InternetGameData game){
+        public void bindGame(final InternetGameData game){
             //Get name of first player
             gameNameTv.setText(game.getName());
 
-            String availability = game.getPlayerList().size() + "/" + game.getPlayerCount();
-            gameAvailability.setText(availability);
+            FirebaseFirestore.getInstance().collection("games")
+                    .document(game.getId())
+                    .collection("players")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                            String availability = queryDocumentSnapshots.size() + "/" + game.getPlayerCount();
+                            gameAvailability.setText(availability);
+                        }
+                    });
         }
     }
 }

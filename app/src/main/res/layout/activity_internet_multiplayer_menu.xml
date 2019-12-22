@@ -7,7 +7,7 @@
     tools:context=".ui.internetmultiplayer.InternetMultiplayerMenu">
 
     <Button
-        android:id="@+id/createGameBtn"
+        android:id="@+id/hostGameBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -28,7 +28,7 @@
         app:layout_constraintBottom_toTopOf="@+id/availableGamesRv"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/createGameBtn" />
+        app:layout_constraintTop_toBottomOf="@+id/hostGameBtn" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/availableGamesRv"

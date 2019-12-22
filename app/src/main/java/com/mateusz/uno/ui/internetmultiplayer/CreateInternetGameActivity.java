@@ -1,24 +1,24 @@
 package com.mateusz.uno.ui.internetmultiplayer;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.InternetGameData;
+import com.mateusz.uno.data.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 
@@ -42,7 +42,7 @@ public class CreateInternetGameActivity extends AppCompatActivity implements Vie
     private void initialiseViews() {
         gameNameEt = findViewById(R.id.gameNameEt);
 
-        createGameBtn = findViewById(R.id.createGameBtn);
+        createGameBtn = findViewById(R.id.hostGameBtn);
         createGameBtn.setOnClickListener(this);
 
         twoPlayerRBtn = findViewById(R.id.twoPlayerRBtn);
@@ -53,7 +53,7 @@ public class CreateInternetGameActivity extends AppCompatActivity implements Vie
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.createGameBtn:
+            case R.id.hostGameBtn:
 
                 if(gameNameEt.getText().toString().equals("")){
                     Toast.makeText(this, "Name cannot be empty", Toast.LENGTH_LONG).show();
@@ -69,17 +69,45 @@ public class CreateInternetGameActivity extends AppCompatActivity implements Vie
         }
     }
 
-    private void createGame(String name, int playerCount) {
-        UserData data =  new SharedPrefsHelper(this).getUserData();
+    private void createGame(final String name, final int playerCount) {
 
-        InternetGameData game = new InternetGameData(name, 0, playerCount);
-        game.addPlayer(data.getId());
+        if(FirebaseAuth.getInstance().getCurrentUser() == null){
+            FirebaseAuth.getInstance().signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    addGame(name, playerCount);
+                }
+            });
+        }
+        else{
+            addGame(name, playerCount);
+        }
+    }
+
+    private void addGame(String name, int playerCount) {
+        final UserData userData =  new SharedPrefsHelper(this).getUserData();
+
+        final InternetGameData game = new InternetGameData(name, 0, playerCount);
+
 
         gamesDb.add(game)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
                     public void onSuccess(DocumentReference documentReference) {
-                        openGame(documentReference.getId());
+                        final String gameId = documentReference.getId();
+
+                        gamesDb.document(gameId)
+                                .collection("players")
+                                .document(userData.getId())
+                                .set(new InternetPlayerCards())
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        openGame(gameId);
+                                    }
+                                });
+
+
                     }
                 });
     }

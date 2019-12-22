@@ -16,17 +16,17 @@ public class AIPlayerCardView extends LinearLayout {
         super(context, attrs);
     }
 
-    public void addCard(Card c){
+    public void addCard(int id){
 
         ImageView iv = new ImageView(this.getContext());
         iv.setImageResource(R.drawable.c108);
-        iv.setId(c.getId());
+        iv.setId(id);
 
         this.addView(iv, getParams());
     }
 
-    public void removeCard(Card c){
-        this.removeView(findViewById(c.getId()));
+    public void removeCard(int id){
+        this.removeView(findViewById(id));
         getParams();
     }
 

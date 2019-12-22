@@ -124,7 +124,7 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
                     .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
                     .findViewById(R.id.playerCardsLayout);
 
-            cardView.addCard(c);
+            cardView.addCard(c.getId());
         }
     }
 
@@ -137,7 +137,7 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
             AIPlayerCardView cardView = findViewById(getResources()
                     .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
                     .findViewById(R.id.playerCardsLayout);
-            cardView.removeCard(c);
+            cardView.removeCard(c.getId());
         }
     }
 

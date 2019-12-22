@@ -13,20 +13,19 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.common.collect.Multimap;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.InternetGameData;
+import com.mateusz.uno.data.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 import com.mateusz.uno.ui.start.StartActivity;
@@ -43,6 +42,7 @@ public class InternetMultiplayerMenu extends AppCompatActivity implements View.O
     private ArrayList<InternetGameData> availableGames = new ArrayList<>(0);
     private GameListAdapter gameListAdapter = new GameListAdapter(availableGames);
     private UserData userData;
+    private boolean ready = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,7 +78,7 @@ public class InternetMultiplayerMenu extends AppCompatActivity implements View.O
     }
 
     private void initialiseViews() {
-        createGameBtn = findViewById(R.id.createGameBtn);
+        createGameBtn = findViewById(R.id.hostGameBtn);
         createGameBtn.setOnClickListener(this);
 
         availableGameRv = findViewById(R.id.availableGamesRv);
@@ -87,7 +87,7 @@ public class InternetMultiplayerMenu extends AppCompatActivity implements View.O
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.createGameBtn:
+            case R.id.hostGameBtn:
                 startActivity(new Intent(InternetMultiplayerMenu.this, CreateInternetGameActivity.class));
                 finish();
                 break;
@@ -99,6 +99,19 @@ public class InternetMultiplayerMenu extends AppCompatActivity implements View.O
         super.onStart();
 
         //Get available games
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            FirebaseAuth.getInstance().signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    setUpListener();
+                }
+            });
+        } else {
+            setUpListener();
+        }
+    }
+
+    private void setUpListener() {
         gamesDb.addSnapshotListener(this, new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -116,8 +129,7 @@ public class InternetMultiplayerMenu extends AppCompatActivity implements View.O
                             addToList(queryDocumentSnapshots);
                         }
                     });
-                }
-                else{
+                } else {
                     addToList(queryDocumentSnapshots);
                 }
             }
@@ -128,19 +140,26 @@ public class InternetMultiplayerMenu extends AppCompatActivity implements View.O
         userData = new SharedPrefsHelper(this).getUserData();
 
         if (userData.getId() != null) {
-            usersDb.document(userData.getId()).set(userData);
+            usersDb.document(userData.getId()).set(userData).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    ready = true;
+                }
+            });
         } else {
             usersDb.add(userData).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                 @Override
                 public void onSuccess(DocumentReference documentReference) {
                     userData.setId(documentReference.getId());
                     new SharedPrefsHelper(InternetMultiplayerMenu.this).setUserData(userData);
+                    ready = true;
                 }
             });
         }
     }
 
     private void openGame(final String gameId) {
+        if(!ready) return;
 
         //Check if game is full
         final DocumentReference gameRef = gamesDb.document(gameId);
@@ -148,42 +167,41 @@ public class InternetMultiplayerMenu extends AppCompatActivity implements View.O
         gameRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                InternetGameData data = documentSnapshot.toObject(InternetGameData.class);
+                final InternetGameData data = documentSnapshot.toObject(InternetGameData.class);
 
-                if (data.getPlayerList() == null) return;
+                gameRef.collection("players").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        if (queryDocumentSnapshots == null) return;
 
-                if (data.getPlayerList().size() == data.getPlayerCount()) {
-                    Toast.makeText(InternetMultiplayerMenu.this, "Game is full.", Toast.LENGTH_LONG).show();
-                    return;
-                }
+                        if (data.getPlayerCount() == queryDocumentSnapshots.size()) {
+                            Toast.makeText(InternetMultiplayerMenu.this, "Game is full.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
-                data.addPlayer(userData.getId());
-                gameRef.set(data);
-
-                Intent i = new Intent(InternetMultiplayerMenu.this, InternetGameLoadingActivity.class);
-                i.putExtra("id", gameId);
-                startActivity(i);
-                finish();
+                        gameRef.collection("players").document(userData.getId()).set(new InternetPlayerCards()).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Intent i = new Intent(InternetMultiplayerMenu.this, InternetGameLoadingActivity.class);
+                                i.putExtra("id", gameId);
+                                startActivity(i);
+                                finish();
+                            }
+                        });
+                    }
+                });
             }
         });
     }
 
-    private void addToList(QuerySnapshot queryDocumentSnapshots){
+    private void addToList(QuerySnapshot queryDocumentSnapshots) {
         for (QueryDocumentSnapshot s : queryDocumentSnapshots) {
 
-            InternetGameData game = s.toObject(InternetGameData.class);
-            game.setId(s.getId());
-            int i = 0;
+            InternetGameData gameData = s.toObject(InternetGameData.class);
+            gameData.setId(s.getId());
 
-            for (InternetGameData games : availableGames) {
-                if (games.getId().equals(game.getId())) {
-                    i++;
-                    if (games.getPlayerList().size() != game.getPlayerList().size())
-                        games.setPlayerList(game.getPlayerList());
-                }
-            }
-
-            if (i == 0) availableGames.add(game);
+            availableGames.add(gameData);
+            gameListAdapter.notifyDataSetChanged();
         }
         gameListAdapter.notifyDataSetChanged();
     }

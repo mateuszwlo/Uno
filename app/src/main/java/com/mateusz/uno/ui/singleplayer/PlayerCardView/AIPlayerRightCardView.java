@@ -17,11 +17,11 @@ public class AIPlayerRightCardView extends AIPlayerCardView {
     }
 
     @Override
-    public void addCard(Card c){
+    public void addCard(int id){
 
         ImageView iv = new ImageView(this.getContext());
         iv.setImageResource(R.drawable.c108);
-        iv.setId(c.getId());
+        iv.setId(id);
         iv.setRotation(270);
 
         this.addView(iv, getParams());

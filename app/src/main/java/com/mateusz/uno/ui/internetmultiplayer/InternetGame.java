@@ -8,15 +8,21 @@ import androidx.annotation.Nullable;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Deck;
 import com.mateusz.uno.data.InternetGameData;
+import com.mateusz.uno.data.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 
@@ -52,6 +58,18 @@ public class InternetGame {
         userIds = new String[playerCount];
         currentPlayer = 0;
         order = 1;
+
+        if(FirebaseAuth.getInstance().getCurrentUser() == null){
+            FirebaseAuth.getInstance().signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    setup();
+                }
+            });
+        }
+        else{
+            setup();
+        }
     }
 
     //Presenter Methods
@@ -64,69 +82,89 @@ public class InternetGame {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 final InternetGameData gameData = documentSnapshot.toObject(InternetGameData.class);
 
-                gameData.getPlayerList().toArray(userIds);
-                Arrays.sort(userIds);
-
-                for (int i = 0; i < userIds.length; i++) {
-                    if (userIds[i].equals(userData.getId())) {
-                        index = i;
-                        break;
-                    }
-
-                }
-                adjustUserOrder();
-
-                for (int i = 0; i < userIds.length; i++) {
-                    final int finalI = i;
-                    usersDb.document(userIds[i]).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            UserData data = documentSnapshot.toObject(UserData.class);
-
-                            mView.setupPlayerData(finalI + 1, data);
-                            players[finalI] = data;
-
-                            if (isListFull(players)) {
-                                playerDrawCard(0, 7);
-                                mView.hideLoadingGameDialog();
-                                updateVariables(gameData);
-                                ready = true;
-
-                                //if(players[getNewOrder(0)].getId().equals(userData.getId())) changeCurrentCard(deck.drawFirstCard());
-                            }
-                        }
-                    });
-                }
-
-                gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                gameRef.collection("players").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                     @Override
-                    public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                        InternetGameData newGameData = documentSnapshot.toObject(InternetGameData.class);
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        int e = 0;
+                        for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                            userIds[e] = doc.getId();
+                            Log.d("PLAYER: ", doc.getId());
+                            e++;
+                        }
 
-                        if (!ready || hasWon) return;
-                        if (gameData.getPlayers().size() == 1) return;
+                        if(!isArrayFull(userIds)){
+                            Log.d("ARRAY", "PLAYERS ARRAY IS NOT FULL");
+                            return;
+                        }
 
-                        updateVariables(newGameData);
+                        Arrays.sort(userIds);
 
                         for (int i = 0; i < userIds.length; i++) {
-                            List<Integer> playerCards = newGameData.getPlayers().get(userIds[i]);
-                            mView.updateCardViews(i, playerCards);
-
-                            for (int j = 0; j < playerCards.size(); j++) {
-                                if (deck.contains(deck.fetchCard(j)))
-                                    deck.removeCard(deck.fetchCard(j));
+                            if (userIds[i].equals(userData.getId())) {
+                                index = i;
+                                break;
                             }
+
+                        }
+                        adjustUserOrder();
+
+                        for (int i = 0; i < userIds.length; i++) {
+                            final int finalI = i;
+                            usersDb.document(userIds[i]).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    UserData data = documentSnapshot.toObject(UserData.class);
+
+                                    mView.setupPlayerData(finalI + 1, data);
+                                    players[finalI] = data;
+
+                                    if (isArrayFull(players)) {
+                                        playerDrawCard(0, 7);
+                                        mView.hideLoadingGameDialog();
+                                        updateVariables(gameData);
+                                        ready = true;
+
+                                        //if(players[getNewOrder(0)].getId().equals(userData.getId())) changeCurrentCard(deck.drawFirstCard());
+                                    }
+                                }
+                            });
+
+                            gameRef.collection("players").document(userIds[i]).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                                @Override
+                                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+
+                                    if(documentSnapshot.toObject(InternetPlayerCards.class) == null) return;
+
+                                    List<Integer> playerCards = documentSnapshot.toObject(InternetPlayerCards.class).getCards();
+                                    mView.updateCardViews(finalI, playerCards);
+
+                                    for (int j = 0; j < playerCards.size(); j++) {
+                                        if (deck.contains(deck.fetchCard(j)))
+                                            deck.removeCard(deck.fetchCard(j));
+                                    }
+                                }
+                            });
+
+                            gameRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                                @Override
+                                public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+                                    InternetGameData newGameData = documentSnapshot.toObject(InternetGameData.class);
+
+                                    if (!ready || hasWon) return;
+
+                                    updateVariables(newGameData);
+                                }
+                            });
                         }
                     }
                 });
-
             }
         });
     }
 
-    private boolean isListFull(UserData[] players) {
-        for (int i = 0; i < players.length; i++) {
-            if (players[i] == null) return false;
+    private <T> boolean isArrayFull(T[] array) {
+        for(T element : array){
+            if(element == null) return false;
         }
 
         return true;
@@ -170,6 +208,7 @@ public class InternetGame {
 
         //Change player
         currentPlayer = getNewOrder(gameData.getCurrentPlayer());
+        if(players[currentPlayer] == null) return;
         mView.changeTurnText(players[currentPlayer].getName());
     }
 
@@ -276,44 +315,17 @@ public class InternetGame {
     }
 
     private void playerDrawCard(final int player, final int num) {
+        for (int i = 0; i < num; i++) {
+            int id = deck.getRandomCard().getId();
+            mView.addCardView(player, id);
 
-        final ArrayList<Integer> cards = new ArrayList<>(0);
-
-        for(int i = 0; i < num; i++) {
-            Card c = deck.getRandomCard();
-            cards.add(c.getId());
-            mView.addCardView(player, c);
+            gameRef.collection("players").document(userIds[player]).update("cards", FieldValue.arrayUnion(id));
         }
-
-        FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<Void>() {
-            @Nullable
-            @Override
-            public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                Map<String, List<Integer>> playerMap = transaction.get(gameRef).toObject(InternetGameData.class).getPlayers();
-
-                for (int c : cards) {
-                    playerMap.get(userIds[player]).add(c);
-                }
-
-                transaction.update(gameRef, "players", playerMap);
-                return null;
-            }
-        });
     }
 
     private void playerRemoveCard(final int player, final Card c) {
-        mView.removeCardView(player, c);
+        mView.removeCardView(player, c.getId());
 
-        FirebaseFirestore.getInstance().runTransaction(new Transaction.Function<Void>() {
-            @Nullable
-            @Override
-            public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                Map<String, List<Integer>> playerMap = transaction.get(gameRef).toObject(InternetGameData.class).getPlayers();
-
-                playerMap.get(userIds[player]).remove(Integer.valueOf(c.getId()));
-                transaction.update(gameRef, "players", playerMap);
-                return null;
-            }
-        });
+        gameRef.collection("players").document(userIds[player]).update("cards", FieldValue.arrayRemove(c.getId()));
     }
 }

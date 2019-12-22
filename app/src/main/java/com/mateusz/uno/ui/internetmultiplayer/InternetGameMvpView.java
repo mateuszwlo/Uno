@@ -7,8 +7,8 @@ import java.util.List;
 
 public interface InternetGameMvpView {
     //User cards
-    void addCardView(int player, Card c);
-    void removeCardView(int player, Card c);
+    void addCardView(int player, int id);
+    void removeCardView(int player, int id);
     void updateCardViews(int player, List<Integer> cards);
     int getPlayerCardCount(int player);
 

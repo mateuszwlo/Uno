@@ -24,8 +24,8 @@
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:rotation="270"
-            app:srcCompat="@drawable/c108"
-            tools:visibility="invisible" />
+            android:visibility="invisible"
+            app:srcCompat="@drawable/c108" />
 
     </com.mateusz.uno.ui.singleplayer.PlayerCardView.AIPlayerRightCardView>
 

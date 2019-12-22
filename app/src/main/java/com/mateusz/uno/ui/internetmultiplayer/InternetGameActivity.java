@@ -18,6 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -26,6 +28,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.j2objc.annotations.ObjectiveCName;
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.Card;
@@ -59,7 +62,7 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
     private HorizontalScrollView.LayoutParams scrollViewParams;
     private ProgressDialog loadingGameDialog;
     private LinearLayout.LayoutParams cardParams;
-    private ListenerRegistration registration;
+    private InternetGameData gameData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +72,14 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         playerCount = getIntent().getIntExtra("playerCount", 2);
         userData = new SharedPrefsHelper(this).getUserData();
 
-        setupBoard();
-        initialiseViews();
 
         gameRef = FirebaseFirestore.getInstance().collection("games").document(gameId);
         usersDb = FirebaseFirestore.getInstance().collection("users");
 
+        setupBoard();
+        initialiseViews();
+
         game = new InternetGame(gameId, playerCount, this);
-        game.setup();
     }
 
     @Override
@@ -84,18 +87,40 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         super.onStart();
 
         if(!ready){
-            loadingGameDialog = new ProgressDialog(this);
+            loadingGameDialog = new ProgressDialog(InternetGameActivity.this);
             loadingGameDialog.setMessage("Loading Game");
             loadingGameDialog.show();
         }
 
-        registration = FirebaseFirestore.getInstance().collection("games").document(gameId)
-                .addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                InternetGameData data = documentSnapshot.toObject(InternetGameData.class);
+        if(FirebaseAuth.getInstance().getCurrentUser() == null){
+            FirebaseAuth.getInstance().signInAnonymously().addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+                    setUpListener();
+                }
+            });
+        }
+        else{
+            setUpListener();
+        }
+    }
 
-                if(data.getPlayerList().size() < data.getPlayerCount()) leaveGame();
+    private void setUpListener() {
+        if(isFinishing()) return;
+
+        gameRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                gameData = documentSnapshot.toObject(InternetGameData.class);
+
+                if(isFinishing()) return;
+
+                gameRef.collection("players").addSnapshotListener(InternetGameActivity.this, new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        if(gameData.getPlayerCount() != queryDocumentSnapshots.size()) leaveGame();
+                    }
+                });
             }
         });
     }
@@ -160,40 +185,43 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
 
     //User Cards
     @Override
-    public void addCardView(int player, Card c) {
+    public void addCardView(int player, int id) {
 
         if (player == 0) {
             ImageView iv = new ImageView(this);
-            iv.setImageResource(getResources().getIdentifier("c" + c.getId(), "drawable", getPackageName()));
-            iv.setId(c.getId());
+            iv.setImageResource(getResources().getIdentifier("c" + id, "drawable", getPackageName()));
+            iv.setId(id);
             iv.setOnClickListener(this);
 
-            userCards.addView(iv, cardParams);
+            userCards.addView(iv, getUserCardParams());
         } else {
             AIPlayerCardView cardView = findViewById(getResources()
                     .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
                     .findViewById(R.id.playerCardsLayout);
 
-            cardView.addCard(c);
+            cardView.addCard(id);
         }
     }
 
     @Override
-    public void removeCardView(int player, Card c) {
+    public void removeCardView(int player, int id) {
         if (player == 0) {
-            userCards.removeView(findViewById(c.getId()));
+            userCards.removeView(findViewById(id));
+            getUserCardParams();
         } else {
             AIPlayerCardView cardView = findViewById(getResources()
                     .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
                     .findViewById(R.id.playerCardsLayout);
-            cardView.removeCard(c);
+            cardView.removeCard(id);
         }
     }
 
     @Override
     public void updateCardViews(int player, List<Integer> cards) {
         //User Cards
-        if (player == 0) return;
+        if (player == 0){
+            return;
+        }
 
         //Other players' cards
         AIPlayerCardView cardView = findViewById(getResources()
@@ -201,14 +229,28 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
             .findViewById(R.id.playerCardsLayout);
 
         for(int card : cards){
-            if(cardView.findViewById(card) == null) cardView.addCard(deck.fetchCard(card));
+            if(cardView.findViewById(card) == null) cardView.addCard(card);
         }
 
         for(int i = 0; i < cardView.getChildCount(); i++){
-            if(!cards.contains(cardView.getChildAt(i).getId())){
+            int id = cardView.getChildAt(i).getId();
+
+            if(!cards.contains(id) && id != R.id.placeholderCard){
                 cardView.removeView(cardView.getChildAt(i));
             }
         }
+    }
+
+    public LinearLayout.LayoutParams getUserCardParams() {
+
+        LinearLayout l = userCards.findViewById(R.id.userCardsLayout);
+
+        if (l.getChildCount() < 7) scrollViewParams.gravity = Gravity.CENTER_HORIZONTAL;
+        else scrollViewParams.gravity = Gravity.START;
+
+        l.setLayoutParams(scrollViewParams);
+
+        return cardParams;
     }
 
     @Override
@@ -369,6 +411,7 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     public void hideLoadingGameDialog() {
+        if(isFinishing() || loadingGameDialog == null) return;
         loadingGameDialog.dismiss();
     }
 
@@ -421,6 +464,8 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
 
     @Override
     protected void onDestroy() {
+        loadingGameDialog.dismiss();
+
         if(!hasLeft){
             leaveGame();
             startActivity(new Intent(InternetGameActivity.this, InternetMultiplayerMenu.class));
@@ -431,21 +476,11 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
     }
 
     private void leaveGame(){
-        registration.remove();
-
-        FirebaseFirestore.getInstance().collection("games").document(gameId).get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+        gameRef.collection("players").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                InternetGameData gameData = documentSnapshot.toObject(InternetGameData.class);
-
-                if(gameData.getPlayers().size() == 1){
-                    gameRef.delete();
-                }
-                else{
-                    gameData.getPlayers().remove(userData.getId());
-                    gameRef.update("players", gameData.getPlayers());
-                }
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                if(queryDocumentSnapshots.size() == 1) gameRef.delete();
+                else gameRef.collection("players").document(userData.getId()).delete();
             }
         });
 
