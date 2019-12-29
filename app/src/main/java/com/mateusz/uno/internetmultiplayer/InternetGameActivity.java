@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.internetmultiplayer;
+package com.mateusz.uno.internetmultiplayer;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -24,24 +24,19 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.j2objc.annotations.ObjectiveCName;
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.Card;
-import com.mateusz.uno.data.InternetGameData;
+import com.mateusz.uno.internetmultiplayer.InternetGameData;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
-import com.mateusz.uno.ui.singleplayer.PlayerCardView.AIPlayerCardView;
+import com.mateusz.uno.singleplayer.PlayerCardView.AIPlayerCardView;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import static com.mateusz.uno.ui.internetmultiplayer.InternetGame.deck;
-import static com.mateusz.uno.ui.internetmultiplayer.InternetGame.ready;
+import static com.mateusz.uno.internetmultiplayer.InternetGame.deck;
+import static com.mateusz.uno.internetmultiplayer.InternetGame.ready;
 
 public class InternetGameActivity extends AppCompatActivity implements View.OnClickListener, InternetGameMvpView {
 

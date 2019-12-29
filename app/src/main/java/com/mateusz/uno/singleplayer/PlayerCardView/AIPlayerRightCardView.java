@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.singleplayer.PlayerCardView;
+package com.mateusz.uno.singleplayer.PlayerCardView;
 
 import android.content.Context;
 import android.util.AttributeSet;

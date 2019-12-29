@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.internetmultiplayer;
+package com.mateusz.uno.internetmultiplayer;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,13 +9,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.InternetGameData;
+import com.mateusz.uno.internetmultiplayer.InternetGameData;
 
 import java.util.ArrayList;
 

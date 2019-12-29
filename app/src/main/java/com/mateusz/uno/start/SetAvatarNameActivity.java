@@ -1,14 +1,11 @@
-package com.mateusz.uno.ui.start;
+package com.mateusz.uno.start;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.widget.ImageViewCompat;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,10 +14,7 @@ import android.widget.Toast;
 
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.SharedPrefsHelper;
-import com.mateusz.uno.data.User;
 import com.mateusz.uno.data.UserData;
-
-import java.util.UUID;
 
 public class SetAvatarNameActivity extends AppCompatActivity implements View.OnClickListener {
 

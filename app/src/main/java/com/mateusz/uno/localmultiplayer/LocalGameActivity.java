@@ -1,11 +1,11 @@
-package com.mateusz.uno.ui.singleplayer;
+package com.mateusz.uno.localmultiplayer;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -14,41 +14,41 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.Card;
-import com.mateusz.uno.data.Card.Colour;
+import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
-import com.mateusz.uno.ui.singleplayer.PlayerCardView.AIPlayerCardView;
-import com.mateusz.uno.ui.start.StartActivity;
+import com.mateusz.uno.internetmultiplayer.InternetGame;
+import com.mateusz.uno.singleplayer.PlayerCardView.*;
 
-public class SinglePlayerGameActivity extends AppCompatActivity implements SinglePlayerMvpView, View.OnClickListener {
+import static com.mateusz.uno.localmultiplayer.LocalGame.deck;
+
+public class LocalGameActivity extends AppCompatActivity implements View.OnClickListener, LocalGameMvpView{
+
+    private LocalGame game;
+    private UserData userData;
 
     private LinearLayout userCards;
     private ImageView deckIv;
     private ImageView pileIv;
     private TextView playerTurnTv;
     private AlertDialog colourPickerDialog;
-    public static SinglePlayerGame game;
-    private int playerCount;
     private HorizontalScrollView.LayoutParams scrollViewParams;
-    LinearLayout.LayoutParams cardParams;
+    private ProgressDialog loadingGameDialog;
+    private LinearLayout.LayoutParams cardParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_singleplayer_vertical);
 
-        playerCount = getIntent().getIntExtra("playerCount", 2);
-
-        setupBoard();
+        userData = new SharedPrefsHelper(this).getUserData();
         initialiseViews();
 
-        game = new SinglePlayerGame(playerCount, this);
-        game.play();
+        game = new LocalGame(this);
 
     }
 
-    public void initialiseViews() {
+    private void initialiseViews(){
         userCards = findViewById(R.id.userCards).findViewById(R.id.userCardsLayout);
 
         deckIv = findViewById(R.id.deckIv);
@@ -71,51 +71,24 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
     }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.deckIv:
                 game.userDrawCard();
             case R.id.pileIv:
                 break;
             default:
-                game.userTurn(game.getDeck().fetchCard(view.getId()));
+                game.userTurn(deck.fetchCard(v.getId()));
                 break;
         }
     }
 
-    public void setupBoard() {
-        //If 1v1, Choose layout portrait, else horizontal
-        if (playerCount == 2) {
-            setContentView(R.layout.activity_singleplayer_vertical);
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else {
-            setContentView(R.layout.activity_singleplayer_horizontal);
-            this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        }
-
-        //Showing AI Cards
-        switch (playerCount) {
-            case 4:
-                findViewById(R.id.player4Cards).setVisibility(View.VISIBLE);
-            case 3:
-                findViewById(R.id.player3Cards).setVisibility(View.VISIBLE);
-            case 2:
-            default:
-                findViewById(R.id.player2Cards).setVisibility(View.VISIBLE);
-                break;
-        }
-    }
-
-    //View Methods
-
-    //User Cards
     @Override
-    public void addCardView(int player, Card c) {
-
+    public void addCardView(int player, int id) {
         if (player == 0) {
             ImageView iv = new ImageView(this);
-            iv.setImageResource(getResources().getIdentifier("c" + c.getId(), "drawable", getPackageName()));
-            iv.setId(c.getId());
+            iv.setImageResource(getResources().getIdentifier("c" + id, "drawable", getPackageName()));
+            iv.setId(id);
             iv.setOnClickListener(this);
 
             userCards.addView(iv, getUserCardParams());
@@ -124,26 +97,21 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
                     .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
                     .findViewById(R.id.playerCardsLayout);
 
-            cardView.addCard(c.getId());
+            cardView.addCard(id);
         }
     }
 
     @Override
-    public void removeCardView(int player, Card c) {
+    public void removeCardView(int player, int id) {
         if (player == 0) {
-            userCards.removeView(findViewById(c.getId()));
+            userCards.removeView(findViewById(id));
             getUserCardParams();
         } else {
             AIPlayerCardView cardView = findViewById(getResources()
                     .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
                     .findViewById(R.id.playerCardsLayout);
-            cardView.removeCard(c.getId());
+            cardView.removeCard(id);
         }
-    }
-
-    @Override
-    public int getPlayer1CardCount() {
-        return userCards.getChildCount();
     }
 
     public LinearLayout.LayoutParams getUserCardParams() {
@@ -158,33 +126,23 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         return cardParams;
     }
 
+    @Override
+    public int getPlayerCardCount(int player) {
+        if (player == 0) {
+            return userCards.getChildCount() - 1;
+        }
+
+        AIPlayerCardView cardView = findViewById(getResources()
+                .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
+                .findViewById(R.id.playerCardsLayout);
+
+        return cardView.getChildCount() - 1;
+    }
+
     //Game
     @Override
     public void changeCurrentCardView(int id) {
         pileIv.setImageResource(getResources().getIdentifier("c" + id, "drawable", getPackageName()));
-    }
-
-    @Override
-    public void changeColour(Colour col) {
-        Card c;
-
-        switch (col) {
-            case RED:
-                c = new Card(109, Colour.RED, "SOLID");
-                break;
-            case YELLOW:
-                c = new Card(110, Colour.YELLOW, "SOLID");
-                break;
-            case GREEN:
-                c = new Card(111, Colour.GREEN, "SOLID");
-                break;
-            case BLUE:
-            default:
-                c = new Card(112, Colour.BLUE, "SOLID");
-                break;
-        }
-        changeCurrentCardView(c.getId());
-        game.changeCurrentCard(c);
     }
 
     @Override
@@ -194,10 +152,9 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
 
     @Override
     public void setupPlayerData(int player, UserData data) {
+        String tag = "player" + (player + 1) + "Cards";
 
-        String tag = "player" + player + "Cards";
-
-        if (player == 1) {
+        if (player == 0) {
             tag = "userCards";
         }
 
@@ -206,6 +163,30 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
 
         TextView tv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.nameTv);
         tv.setText(data.getName());
+    }
+
+    @Override
+    public void setupPlayerName(int player, String name) {
+        String tag = "player" + (player + 1) + "Cards";
+
+        if (player == 0) {
+            tag = "userCards";
+        }
+
+        TextView tv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.nameTv);
+        tv.setText(name);
+    }
+
+    @Override
+    public void setupPlayerPhoto(int player, int photoId) {
+        String tag = "player" + (player + 1) + "Cards";
+
+        if (player == 0) {
+            tag = "userCards";
+        }
+
+        ImageView iv = findViewById(getResources().getIdentifier(tag, "id", getPackageName())).findViewById(R.id.avatarIv);
+        iv.setImageResource(photoId);
     }
 
     @Override
@@ -234,26 +215,8 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         redIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.changeColour(Colour.RED);
                 colourPickerDialog.dismiss();
-            }
-        });
-
-        ImageView blueIv = view.findViewById(R.id.blueIv);
-        blueIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                game.changeColour(Colour.BLUE);
-                colourPickerDialog.dismiss();
-            }
-        });
-
-        ImageView greenIv = view.findViewById(R.id.greenIv);
-        greenIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                game.changeColour(Colour.GREEN);
-                colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(109));
             }
         });
 
@@ -261,8 +224,26 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         yellowIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.changeColour(Colour.YELLOW);
                 colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(110));
+            }
+        });
+
+        ImageView greenIv = view.findViewById(R.id.greenIv);
+        greenIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(111));
+            }
+        });
+
+        ImageView blueIv = view.findViewById(R.id.blueIv);
+        blueIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(112));
             }
         });
 
@@ -282,26 +263,9 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         redIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.wildCard(Colour.RED);
+                game.wildCard();
                 colourPickerDialog.dismiss();
-            }
-        });
-
-        ImageView blueIv = view.findViewById(R.id.blueIv);
-        blueIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                game.wildCard(Colour.BLUE);
-                colourPickerDialog.dismiss();
-            }
-        });
-
-        ImageView greenIv = view.findViewById(R.id.greenIv);
-        greenIv.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                game.wildCard(Colour.GREEN);
-                colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(109));
             }
         });
 
@@ -309,8 +273,29 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         yellowIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.wildCard(Colour.YELLOW);
+                game.wildCard();
                 colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(110));
+            }
+        });
+
+        ImageView greenIv = view.findViewById(R.id.greenIv);
+        greenIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.wildCard();
+                colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(111));
+            }
+        });
+
+        ImageView blueIv = view.findViewById(R.id.blueIv);
+        blueIv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.wildCard();
+                colourPickerDialog.dismiss();
+                game.changeCurrentCard(deck.fetchCard(112));
             }
         });
 
@@ -320,6 +305,12 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         colourPickerDialog.show();
     }
 
+    @Override
+    public void hideLoadingGameDialog() {
+        if(isFinishing() || loadingGameDialog == null) return;
+        loadingGameDialog.dismiss();
+    }
+
     public void showGameEndDialog(String msg) {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setCancelable(false)
@@ -327,10 +318,7 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
                 .setPositiveButton("Play Again", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Intent i = new Intent(SinglePlayerGameActivity.this, SinglePlayerGameActivity.class);
-                        i.putExtra("playerCount", playerCount);
-                        startActivity(i);
-                        finish();
+                        leaveGame();
                     }
                 })
                 .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
@@ -344,6 +332,12 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         dialog.show();
     }
 
+    private void leaveGame(){
+        game.leaveGame();
+        startActivity(new Intent(LocalGameActivity.this, LocalMultiplayerMenu.class));
+        finish();
+    }
+
     @Override
     public void onBackPressed() {
 
@@ -353,9 +347,7 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
-                        startActivity(new Intent(SinglePlayerGameActivity.this, StartActivity.class));
-                        finish();
+                        leaveGame();
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -370,4 +362,10 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         dialog.show();
 
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
 }

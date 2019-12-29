@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -14,16 +14,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <activity android:name=".localmultiplayer.LocalGameActivity"></activity>
         <activity
-            android:name=".ui.internetmultiplayer.InternetGameActivity"
+            android:name=".internetmultiplayer.InternetGameActivity"
             android:configChanges="orientation|screenSize" />
-        <activity android:name=".ui.internetmultiplayer.CreateInternetGameActivity" />
-        <activity android:name=".ui.internetmultiplayer.InternetGameLoadingActivity" />
-        <activity android:name=".ui.internetmultiplayer.InternetMultiplayerMenu" />
-        <activity android:name=".ui.localmultiplayer.LocalMultiplayerMenu" />
-        <activity android:name=".ui.start.SetAvatarNameActivity" />
-        <activity android:name=".ui.singleplayer.SinglePlayerGameActivity" />
-        <activity android:name=".ui.start.StartActivity">
+        <activity android:name=".internetmultiplayer.CreateInternetGameActivity" />
+        <activity android:name=".internetmultiplayer.InternetGameLoadingActivity" />
+        <activity android:name=".internetmultiplayer.InternetMultiplayerMenu" />
+        <activity android:name=".localmultiplayer.LocalMultiplayerMenu" />
+        <activity android:name=".start.SetAvatarNameActivity" />
+        <activity android:name=".singleplayer.SinglePlayerGameActivity" />
+        <activity android:name=".start.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

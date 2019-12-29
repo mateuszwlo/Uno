@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="15dp"
-    tools:context=".ui.internetmultiplayer.CreateInternetGameActivity">
+    tools:context=".internetmultiplayer.CreateInternetGameActivity">
 
     <EditText
         android:id="@+id/gameNameEt"
@@ -54,7 +54,7 @@
     </RadioGroup>
 
     <Button
-        android:id="@+id/hostGameBtn"
+        android:id="@+id/sendMsgBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"

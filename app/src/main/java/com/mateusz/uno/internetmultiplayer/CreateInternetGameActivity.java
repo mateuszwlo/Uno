@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.internetmultiplayer;
+package com.mateusz.uno.internetmultiplayer;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,8 +17,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.InternetGameData;
-import com.mateusz.uno.data.InternetPlayerCards;
+import com.mateusz.uno.internetmultiplayer.InternetGameData;
+import com.mateusz.uno.internetmultiplayer.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 

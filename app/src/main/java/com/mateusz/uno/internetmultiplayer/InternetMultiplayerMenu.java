@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.internetmultiplayer;
+package com.mateusz.uno.internetmultiplayer;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,11 +24,11 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.InternetGameData;
-import com.mateusz.uno.data.InternetPlayerCards;
+import com.mateusz.uno.internetmultiplayer.InternetGameData;
+import com.mateusz.uno.internetmultiplayer.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
-import com.mateusz.uno.ui.start.StartActivity;
+import com.mateusz.uno.start.StartActivity;
 
 import java.util.ArrayList;
 

@@ -1,40 +1,31 @@
-package com.mateusz.uno.ui.internetmultiplayer;
+package com.mateusz.uno.internetmultiplayer;
 
 import android.content.Context;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Transaction;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Deck;
-import com.mateusz.uno.data.InternetGameData;
-import com.mateusz.uno.data.InternetPlayerCards;
+import com.mateusz.uno.internetmultiplayer.InternetGameData;
+import com.mateusz.uno.internetmultiplayer.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
-import static com.mateusz.uno.ui.internetmultiplayer.InternetGameActivity.gameRef;
-import static com.mateusz.uno.ui.internetmultiplayer.InternetGameActivity.usersDb;
+import static com.mateusz.uno.internetmultiplayer.InternetGameActivity.gameRef;
+import static com.mateusz.uno.internetmultiplayer.InternetGameActivity.usersDb;
 
 public class InternetGame {
 

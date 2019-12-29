@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.localmultiplayer;
+package com.mateusz.uno.localmultiplayer;
 
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -6,11 +6,8 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.UUID;
 
 public class BluetoothConnectionService {
@@ -39,11 +37,34 @@ public class BluetoothConnectionService {
     private UUID deviceUUID;
 
     private ProgressDialog progressDialog;
+    private Toast connectionFailedToast, playerJoinedToast;
 
-    public BluetoothConnectionService(Context ctx) {
+    private static BluetoothConnectionService instance;
+    private BluetoothSocket socket;
+
+    private BluetoothConnectionService(Context ctx) {
         this.ctx = ctx;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        connectionFailedToast = Toast.makeText(ctx, "Could not connect to game.", Toast.LENGTH_LONG);
+        playerJoinedToast = Toast.makeText(ctx, "Connection successful.", Toast.LENGTH_SHORT);
+
         start();
+    }
+
+    public static BluetoothConnectionService getInstance(Context ctx){
+        if(instance == null){
+            instance = new BluetoothConnectionService(ctx);
+        }
+
+        return instance;
+    }
+
+    public synchronized void start() {
+        if (connectThread != null) {
+            connectThread.cancel();
+            connectThread = null;
+        }
     }
 
     private class AcceptThread extends Thread {
@@ -71,13 +92,14 @@ public class BluetoothConnectionService {
 
             try {
                 socket = bluetoothServerSocket.accept();
+
                 Log.d(TAG, "run: Server accepted a connection.");
             } catch (IOException e) {
                 Log.d("SERVER_SOCKET", "could not accept server socket connection");
             }
 
             if (socket != null) {
-                connected(socket, device);
+                connected(socket);
                 Log.d("SERVER_SOCKET", "CONNECTED");
             }
         }
@@ -95,12 +117,12 @@ public class BluetoothConnectionService {
 
         private BluetoothSocket bluetoothSocket;
 
-        public ConnectThread(BluetoothDevice mDevice, UUID uuid){
+        public ConnectThread(BluetoothDevice mDevice, UUID uuid) {
             device = mDevice;
             deviceUUID = uuid;
         }
 
-        public void run(){
+        public void run() {
             BluetoothSocket tmp = null;
 
             try {
@@ -126,15 +148,14 @@ public class BluetoothConnectionService {
 
                 Log.d(TAG, "run: ConnectThread: Could not connect to UUID: " + e.getMessage());
                 progressDialog.dismiss();
-                Looper.prepare();
-                Toast.makeText(ctx, "Could not connect to game.", Toast.LENGTH_LONG).show();
+                connectionFailedToast.show();
                 return;
             }
 
-            connected(bluetoothSocket, device);
+            connected(bluetoothSocket);
         }
 
-        public void cancel(){
+        public void cancel() {
             try {
                 bluetoothSocket.close();
             } catch (IOException e) {
@@ -143,24 +164,22 @@ public class BluetoothConnectionService {
         }
     }
 
-    private  class ConnectedThread extends Thread{
-        private final BluetoothSocket bluetoothSocket;
+    private class ConnectedThread extends Thread {
+        final BluetoothSocket bluetoothSocket;
         private final InputStream InStream;
         private final OutputStream OutStream;
 
-        public ConnectedThread(BluetoothSocket bluetoothSocket){
+        public ConnectedThread(BluetoothSocket bluetoothSocket) {
+            socket = bluetoothSocket;
             this.bluetoothSocket = bluetoothSocket;
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
-            try{
-                progressDialog.dismiss();
-                Looper.prepare();
-                Toast.makeText(ctx, "Connection Successful!", Toast.LENGTH_SHORT).show();
-            }
-            catch (Exception e){
-                e.printStackTrace();
-            }
+            progressDialog.dismiss();
+            playerJoinedToast.show();
+
+            Intent i = new Intent(ctx, LocalGameActivity.class);
+            ctx.startActivity(i);
 
             try {
                 tmpIn = bluetoothSocket.getInputStream();
@@ -173,19 +192,23 @@ public class BluetoothConnectionService {
             OutStream = tmpOut;
         }
 
-        public void run(){
+        public void run() {
             byte[] buffer = new byte[1024];
             int numBytes;
 
-            while(true){
+            while (true) {
                 try {
                     numBytes = InStream.read(buffer);
 
                     String incomingMessage = new String(buffer, 0, numBytes);
+
                     Log.d(TAG, "InputStream: " + incomingMessage);
 
                     Intent incomingMessageIntent = new Intent("incomingMessage");
-                    incomingMessageIntent.putExtra("msg", incomingMessage);
+
+                    String[] msg = incomingMessage.split(":");
+
+                    incomingMessageIntent.putExtra(msg[0], msg[1]);
                     LocalBroadcastManager.getInstance(ctx).sendBroadcast(incomingMessageIntent);
 
                 } catch (IOException e) {
@@ -194,19 +217,23 @@ public class BluetoothConnectionService {
             }
         }
 
-        public void write(byte[] bytes){
+        public void write(String key, String msg) {
             try {
-                String text = new String(bytes, Charset.defaultCharset());
+                Thread.sleep(100);
+
+                String text = key + ":" + msg;
                 Log.d(TAG, "write: Writing to outputStream: " + text);
 
-                OutStream.write(bytes);
+                OutStream.write(text.getBytes());
 
             } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
 
-        public void cancel(){
+        public void cancel() {
             try {
                 bluetoothSocket.close();
             } catch (IOException e) {
@@ -215,36 +242,50 @@ public class BluetoothConnectionService {
         }
     }
 
-    public synchronized void start(){
-        if(acceptThread == null){
-            acceptThread = new AcceptThread();
-            acceptThread.start();
-        }
+    public void startServer() {
+        Log.d(TAG, "startServer: Starting Server Socket.");
+        progressDialog = ProgressDialog.show(ctx, "Hosting Game", "Please Wait for someone to join...", true);
+        progressDialog.setCancelable(true);
 
-        if(connectThread != null){
-            connectThread.cancel();
-            connectThread = null;
-        }
+        progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                acceptThread.cancel();
+                acceptThread = null;
+            }
+        });
+
+        acceptThread = new AcceptThread();
+        acceptThread.start();
     }
 
-    public void startClient(BluetoothDevice device, UUID uuid){
+    public void connectToServer(BluetoothDevice device) {
         Log.d(TAG, "startClient: Started.");
 
         progressDialog = ProgressDialog.show(ctx, "Connecting to Game", "Please Wait...", true);
 
-        connectThread = new ConnectThread(device, uuid);
+        connectThread = new ConnectThread(device, MY_UUID);
         connectThread.start();
     }
 
-    private void connected(BluetoothSocket bluetoothSocket, BluetoothDevice device) {
+    private void connected(BluetoothSocket bluetoothSocket) {
         Log.d(TAG, "connected: Starting.");
 
         connectedThread = new ConnectedThread(bluetoothSocket);
         connectedThread.start();
     }
 
-    public void write(byte[] out){
+    public void write(String key, String msg) {
         Log.d(TAG, "write: Write Called.");
-        connectedThread.write(out);
+        connectedThread.write(key, msg);
+    }
+
+    public void disconnect(){
+        try {
+            socket.close();
+        } catch (IOException e) {
+            Log.d(TAG, "disconnect: DISCONNECTING FROM SOCKET");
+            e.printStackTrace();
+        }
     }
 }

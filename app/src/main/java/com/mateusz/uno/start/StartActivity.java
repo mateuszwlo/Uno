@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.start;
+package com.mateusz.uno.start;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,9 +14,9 @@ import android.widget.TextView;
 import com.mateusz.uno.R;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
-import com.mateusz.uno.ui.internetmultiplayer.InternetMultiplayerMenu;
-import com.mateusz.uno.ui.localmultiplayer.LocalMultiplayerMenu;
-import com.mateusz.uno.ui.singleplayer.SinglePlayerGameActivity;
+import com.mateusz.uno.internetmultiplayer.InternetMultiplayerMenu;
+import com.mateusz.uno.localmultiplayer.LocalMultiplayerMenu;
+import com.mateusz.uno.singleplayer.SinglePlayerGameActivity;
 
 public class StartActivity extends AppCompatActivity implements View.OnClickListener{
 

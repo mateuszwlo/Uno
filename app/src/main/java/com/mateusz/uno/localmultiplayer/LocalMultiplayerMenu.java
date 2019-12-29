@@ -1,49 +1,41 @@
-package com.mateusz.uno.ui.localmultiplayer;
+package com.mateusz.uno.localmultiplayer;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mateusz.uno.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-public class LocalMultiplayerMenu extends AppCompatActivity {
+public class LocalMultiplayerMenu extends AppCompatActivity implements View.OnClickListener{
 
     private Button hostGameBtn;
     private ListView availableGamesListView;
-    private EditText editText;
-    private TextView msgTv;
 
     private BluetoothAdapter bluetoothAdapter;
     private List<BluetoothDevice> bluetoothDevicesList = new ArrayList<>(0);
     private List<String> bluetoothNamesList = new ArrayList<>(0);
     private ArrayAdapter<String> listViewAdapter;
+    private boolean bluetoothReady = false;
 
     private BluetoothConnectionService bluetoothConnectionService;
     private BluetoothDevice pairedDevice;
-    private final UUID MY_UUID = UUID.fromString("e31bb97d-9d8d-40a1-bc63-0168e67fd803");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,41 +43,36 @@ public class LocalMultiplayerMenu extends AppCompatActivity {
         setContentView(R.layout.activity_local_multiplayer_menu);
 
         initialiseViews();
+        setUpListView();
         setUpBluetooth();
     }
 
     private void initialiseViews() {
         hostGameBtn = findViewById(R.id.hostGameBtn);
-        availableGamesListView = findViewById(R.id.availableGamesListView);
+        hostGameBtn.setOnClickListener(this);
 
+        availableGamesListView = findViewById(R.id.availableGamesListView);
+    }
+
+    private void setUpListView(){
         listViewAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, bluetoothNamesList);
         availableGamesListView.setAdapter(listViewAdapter);
 
         availableGamesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                bluetoothAdapter.cancelDiscovery();
-
-                Log.d("BluetoothMenu", "Trying to pair with device: " + bluetoothDevicesList.get(position).getName());
-                bluetoothDevicesList.get(position).createBond();
-
-                pairedDevice = bluetoothDevicesList.get(position);
-
-                bluetoothConnectionService = new BluetoothConnectionService(LocalMultiplayerMenu.this);
-                bluetoothConnectionService.startClient(pairedDevice, MY_UUID);
+                connectToGame(bluetoothDevicesList.get(position));
             }
         });
+    }
 
-        editText = findViewById(R.id.editText);
-        msgTv = findViewById(R.id.msgTv);
-
-        hostGameBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-               bluetoothConnectionService.write(editText.getText().toString().getBytes());
-               editText.setText("");
-            }
-        });
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.hostGameBtn:
+                hostGame();
+                break;
+        }
     }
 
     private void setUpBluetooth() {
@@ -122,11 +109,9 @@ public class LocalMultiplayerMenu extends AppCompatActivity {
         IntentFilter pairingFilter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(pairingReceiver, pairingFilter);
 
-        bluetoothConnectionService = new BluetoothConnectionService(this);
+        bluetoothConnectionService = BluetoothConnectionService.getInstance(this);
 
-        //Messages receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(messageReceiver, new IntentFilter("incomingMessage"));
-
+        bluetoothReady = true;
     }
 
     private void checkBTPermissions() {
@@ -144,6 +129,24 @@ public class LocalMultiplayerMenu extends AppCompatActivity {
         }
     }
 
+    private void hostGame(){
+        if(!bluetoothReady) return;
+
+        bluetoothConnectionService.startServer();
+    }
+
+    private void connectToGame(BluetoothDevice device){
+        bluetoothAdapter.cancelDiscovery();
+
+        Log.d("BluetoothMenu", "Trying to pair with device: " + device.getName());
+        device.createBond();
+
+        pairedDevice = device;
+
+        bluetoothConnectionService = BluetoothConnectionService.getInstance(this);
+        bluetoothConnectionService.connectToServer(pairedDevice);
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -151,7 +154,6 @@ public class LocalMultiplayerMenu extends AppCompatActivity {
         unregisterReceiver(enableBtReceiver);
         unregisterReceiver(discoveryReceiver);
         unregisterReceiver(discoverabilityReceiver);
-        unregisterReceiver(messageReceiver);
     }
 
     private final BroadcastReceiver enableBtReceiver = new BroadcastReceiver() {
@@ -255,15 +257,6 @@ public class LocalMultiplayerMenu extends AppCompatActivity {
                         break;
                 }
             }
-        }
-    };
-
-    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String text = intent.getStringExtra("msg");
-
-            msgTv.setText(text);
         }
     };
 }

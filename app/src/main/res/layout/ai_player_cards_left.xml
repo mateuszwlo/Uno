@@ -7,7 +7,7 @@
     android:layout_gravity="left|center_vertical"
     android:orientation="vertical">
 
-    <com.mateusz.uno.ui.singleplayer.PlayerCardView.AIPlayerLeftCardView
+    <com.mateusz.uno.singleplayer.PlayerCardView.AIPlayerLeftCardView
         android:id="@+id/playerCardsLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -27,7 +27,7 @@
             android:visibility="invisible"
             app:srcCompat="@drawable/c108" />
 
-    </com.mateusz.uno.ui.singleplayer.PlayerCardView.AIPlayerLeftCardView>
+    </com.mateusz.uno.singleplayer.PlayerCardView.AIPlayerLeftCardView>
 
     <ImageView
         android:id="@+id/avatarIv"

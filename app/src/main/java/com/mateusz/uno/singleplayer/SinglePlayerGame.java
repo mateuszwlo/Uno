@@ -1,15 +1,16 @@
-package com.mateusz.uno.ui.singleplayer;
+package com.mateusz.uno.singleplayer;
 
 import android.content.Context;
 
-import com.mateusz.uno.data.AIPlayer;
+import com.mateusz.uno.singleplayer.AIPlayer;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Card.Colour;
 import com.mateusz.uno.data.Deck;
 import com.mateusz.uno.data.Player;
 import com.mateusz.uno.data.SharedPrefsHelper;
-import com.mateusz.uno.data.User;
+import com.mateusz.uno.singleplayer.User;
 import com.mateusz.uno.data.UserData;
+import com.mateusz.uno.singleplayer.SinglePlayerMvpView;
 
 import java.util.Random;
 

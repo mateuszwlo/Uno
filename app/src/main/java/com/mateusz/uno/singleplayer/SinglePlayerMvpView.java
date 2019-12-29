@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.singleplayer;
+package com.mateusz.uno.singleplayer;
 
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.UserData;

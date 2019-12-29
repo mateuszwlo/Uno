@@ -1,4 +1,4 @@
-package com.mateusz.uno.data;
+package com.mateusz.uno.internetmultiplayer;
 
 import java.util.ArrayList;
 

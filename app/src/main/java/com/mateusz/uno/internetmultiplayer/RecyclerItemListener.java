@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.internetmultiplayer;
+package com.mateusz.uno.internetmultiplayer;
 
 import android.content.Context;
 import android.view.GestureDetector;

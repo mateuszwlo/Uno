@@ -1,4 +1,4 @@
-package com.mateusz.uno.ui.singleplayer.PlayerCardView;
+package com.mateusz.uno.singleplayer.PlayerCardView;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -8,7 +8,6 @@ import android.widget.LinearLayout;
 import androidx.annotation.Nullable;
 
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.Card;
 
 public class AIPlayerCardView extends LinearLayout {
 

@@ -1,8 +1,11 @@
-package com.mateusz.uno.data;
+package com.mateusz.uno.singleplayer;
 
-import com.mateusz.uno.ui.singleplayer.SinglePlayerMvpView;
-import static com.mateusz.uno.ui.singleplayer.SinglePlayerGame.currentCard;
+import com.mateusz.uno.data.Card;
+import com.mateusz.uno.data.Deck;
+import com.mateusz.uno.data.Player;
+import com.mateusz.uno.singleplayer.SinglePlayerMvpView;
 
+import static com.mateusz.uno.singleplayer.SinglePlayerGame.currentCard;
 public class User implements Player {
 
     private String name;

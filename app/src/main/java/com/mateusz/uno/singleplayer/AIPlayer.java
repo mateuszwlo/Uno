@@ -1,10 +1,13 @@
-package com.mateusz.uno.data;
+package com.mateusz.uno.singleplayer;
 
 import android.os.Handler;
 
-import com.mateusz.uno.ui.singleplayer.SinglePlayerMvpView;
+import com.mateusz.uno.data.Card;
+import com.mateusz.uno.data.Deck;
+import com.mateusz.uno.data.Player;
 import java.util.ArrayList;
-import static com.mateusz.uno.ui.singleplayer.SinglePlayerGameActivity.game;
+
+import static com.mateusz.uno.singleplayer.SinglePlayerGameActivity.game;
 import com.mateusz.uno.data.Card.Colour;
 
 public class AIPlayer implements Player {

@@ -1,38 +1,25 @@
-package com.mateusz.uno.ui.singleplayer.PlayerCardView;
+package com.mateusz.uno.singleplayer.PlayerCardView;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
 import com.mateusz.uno.R;
-import com.mateusz.uno.data.Card;
 
-public class AIPlayerLeftCardView extends AIPlayerCardView{
+public class AIPlayerTopCardView extends AIPlayerCardView{
 
-    public AIPlayerLeftCardView(Context context, @Nullable AttributeSet attrs) {
+    public AIPlayerTopCardView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    @Override
-    public void addCard(int id){
-
-        ImageView iv = new ImageView(this.getContext());
-        iv.setImageResource(R.drawable.c108);
-        iv.setId(id);
-        iv.setRotation(90);
-
-        this.addView(iv, getParams());
     }
 
     @Override
     public LinearLayout.LayoutParams getParams() {
         //ImageView Params
         LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                (int) (100 * getResources().getDisplayMetrics().density));
+                (int) (100 * getResources().getDisplayMetrics().density),
+                LinearLayout.LayoutParams.MATCH_PARENT);
 
         //Setting left margins for all cards
         int margin = (int) (-65 * getResources().getDisplayMetrics().density);
@@ -44,7 +31,7 @@ public class AIPlayerLeftCardView extends AIPlayerCardView{
             margin = (int) ((-65 -((this.getChildCount() - 4) * 5)) * getResources().getDisplayMetrics().density);
         }
 
-        cardParams.topMargin = margin;
+        cardParams.leftMargin = margin;
         cardParams.weight = 0;
 
         //Setting margins for each card in the layout
@@ -54,8 +41,10 @@ public class AIPlayerLeftCardView extends AIPlayerCardView{
 
         //Setting width of placeholder card
         LinearLayout.LayoutParams placeholderParams = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                margin * -1);
+                margin * -1,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+
+        if(this.findViewById(R.id.placeholderCard) == null) return cardParams;
 
         this.findViewById(R.id.placeholderCard).setLayoutParams(placeholderParams);
         return cardParams;
