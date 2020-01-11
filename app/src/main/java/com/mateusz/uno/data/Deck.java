@@ -1,7 +1,5 @@
 package com.mateusz.uno.data;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.Random;
 import com.mateusz.uno.data.Card.Colour;

@@ -34,6 +34,8 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
     private HorizontalScrollView.LayoutParams scrollViewParams;
     LinearLayout.LayoutParams cardParams;
 
+    private LinearLayout.LayoutParams layoutParams;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,9 +115,10 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
     public void addCardView(int player, Card c) {
 
         if (player == 0) {
-            ImageView iv = new ImageView(this);
+            final ImageView iv = new ImageView(this);
             iv.setImageResource(getResources().getIdentifier("c" + c.getId(), "drawable", getPackageName()));
             iv.setId(c.getId());
+            iv.setTag(c.getId());
             iv.setOnClickListener(this);
 
             userCards.addView(iv, getUserCardParams());

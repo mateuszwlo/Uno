@@ -15,9 +15,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.mateusz.uno.R;
+import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
-import com.mateusz.uno.internetmultiplayer.InternetGame;
 import com.mateusz.uno.singleplayer.PlayerCardView.*;
 
 import static com.mateusz.uno.localmultiplayer.LocalGame.deck;
@@ -216,7 +216,7 @@ public class LocalGameActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void onClick(View v) {
                 colourPickerDialog.dismiss();
-                game.changeCurrentCard(deck.fetchCard(109));
+                game.changeColour(deck.fetchCard(109));
             }
         });
 
@@ -225,7 +225,7 @@ public class LocalGameActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void onClick(View v) {
                 colourPickerDialog.dismiss();
-                game.changeCurrentCard(deck.fetchCard(110));
+                game.changeColour(deck.fetchCard(110));
             }
         });
 
@@ -234,7 +234,7 @@ public class LocalGameActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void onClick(View v) {
                 colourPickerDialog.dismiss();
-                game.changeCurrentCard(deck.fetchCard(111));
+                game.changeColour(deck.fetchCard(111));
             }
         });
 
@@ -243,7 +243,7 @@ public class LocalGameActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void onClick(View v) {
                 colourPickerDialog.dismiss();
-                game.changeCurrentCard(deck.fetchCard(112));
+                game.changeColour(deck.fetchCard(112));
             }
         });
 
@@ -334,6 +334,7 @@ public class LocalGameActivity extends AppCompatActivity implements View.OnClick
 
     private void leaveGame(){
         game.leaveGame();
+        unregisterReceiver(game.messageReceiver);
         startActivity(new Intent(LocalGameActivity.this, LocalMultiplayerMenu.class));
         finish();
     }

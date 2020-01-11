@@ -42,6 +42,8 @@ public class BluetoothConnectionService {
     private static BluetoothConnectionService instance;
     private BluetoothSocket socket;
 
+    public static boolean isHosting = false;
+
     private BluetoothConnectionService(Context ctx) {
         this.ctx = ctx;
         this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -219,7 +221,7 @@ public class BluetoothConnectionService {
 
         public void write(String key, String msg) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(200);
 
                 String text = key + ":" + msg;
                 Log.d(TAG, "write: Writing to outputStream: " + text);
@@ -243,6 +245,8 @@ public class BluetoothConnectionService {
     }
 
     public void startServer() {
+        isHosting = true;
+
         Log.d(TAG, "startServer: Starting Server Socket.");
         progressDialog = ProgressDialog.show(ctx, "Hosting Game", "Please Wait for someone to join...", true);
         progressDialog.setCancelable(true);
@@ -261,6 +265,8 @@ public class BluetoothConnectionService {
 
     public void connectToServer(BluetoothDevice device) {
         Log.d(TAG, "startClient: Started.");
+
+        isHosting = false;
 
         progressDialog = ProgressDialog.show(ctx, "Connecting to Game", "Please Wait...", true);
 
@@ -282,6 +288,9 @@ public class BluetoothConnectionService {
 
     public void disconnect(){
         try {
+            acceptThread.cancel();
+            connectedThread.cancel();
+            connectThread.cancel();
             socket.close();
         } catch (IOException e) {
             Log.d(TAG, "disconnect: DISCONNECTING FROM SOCKET");

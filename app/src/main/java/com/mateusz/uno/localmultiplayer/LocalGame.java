@@ -5,33 +5,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 
-import androidx.annotation.Nullable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Deck;
-import com.mateusz.uno.internetmultiplayer.InternetGameData;
-import com.mateusz.uno.internetmultiplayer.InternetGameMvpView;
-import com.mateusz.uno.internetmultiplayer.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
+import com.mateusz.uno.singleplayer.User;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static com.mateusz.uno.internetmultiplayer.InternetGameActivity.gameRef;
-import static com.mateusz.uno.internetmultiplayer.InternetGameActivity.usersDb;
+import static com.mateusz.uno.localmultiplayer.BluetoothConnectionService.isHosting;
 
 public class LocalGame {
 
@@ -43,12 +26,14 @@ public class LocalGame {
     private int order;
     private boolean hasWon = false;
     private BluetoothConnectionService bluetoothConnectionService;
+    private UserData userData;
 
     public LocalGame(LocalGameMvpView mView) {
         this.mView = mView;
         deck = new Deck();
         currentPlayer = 0;
         order = 1;
+        players = new UserData[2];
 
         setup();
     }
@@ -59,62 +44,82 @@ public class LocalGame {
 
         LocalBroadcastManager.getInstance((Context) mView).registerReceiver(messageReceiver, new IntentFilter("incomingMessage"));
 
-        UserData userData = new SharedPrefsHelper((Context) mView).getUserData();
+        userData = new SharedPrefsHelper((Context) mView).getUserData();
         bluetoothConnectionService.write("name", userData.getName());
         bluetoothConnectionService.write("photoId", String.valueOf(userData.getPhotoId()));
 
-        playerDrawCard(0, 7);
+        players[0] = userData;
+        players[1] = new UserData();
+
+        mView.setupPlayerData(0, userData);
+
+        if(isHosting){
+            changeCurrentCard(deck.drawFirstCard());
+            bluetoothConnectionService.write("firstCard", String.valueOf(currentCard.getId()));
+            mView.changeTurnText(userData.getName());
+        }
+        else{
+            currentPlayer = 1;
+        }
+
+        drawFirstCards();
 
         mView.hideLoadingGameDialog();
     }
 
     private int getNextPlayer() {
-        int next = currentPlayer + order;
-
-        if (next == -1) return players.length - 1;
-        else if (next == players.length) return 0;
-        else return next;
+        if(currentPlayer == 0) return 1;
+        return 0;
     }
 
-    public void action(Card c) {
+    private void action(Card c) {
         if (hasWon) return;
 
         switch (c.getValue()) {
             case "plus2":
-                playerDrawCard(getNextPlayer());
-                playerDrawCard(getNextPlayer());
+                playerDrawCard(1);
+                playerDrawCard(1);
                 changeTurn(2);
-                return;
+                break;
             case "skip":
-                changeTurn(2);
-                return;
             case "reverse":
-                if (players.length == 2) changeTurn();
-                if (order == 1) order = -1;
-                else order = 1;
-                changeTurn();
-                return;
+                changeTurn(2);
+                break;
             case "wild":
                 mView.showColourPickerDialog();
                 changeTurn();
-                return;
+                break;
             case "wildcard":
                 mView.showWildCardColourPickerDialog();
                 changeTurn(2);
-                return;
+                break;
             default:
                 changeTurn();
                 break;
         }
+    }
 
+    private void onReceiveAction(Card c){
+        changeTurn();
+        changeCurrentCard(c);
+        deck.removeCard(c);
+        mView.removeCardView(1, c.getId());
+
+        switch (c.getValue()){
+            case "skip":
+            case "reverse":
+            case "plus2":
+            case "wildcard":
+                changeTurn();
+                break;
+        }
     }
 
     private void checkForWin() {
-        for (int i = 0; i < players.length; i++) {
-            if (mView.getPlayerCardCount(i) == 0) {
-                mView.showPlayerWinDialog(players[i].getName());
-                hasWon = true;
-            }
+        if(mView.getPlayerCardCount(0) == 0){
+            bluetoothConnectionService.write("won", players[0].getName());
+            hasWon = true;
+            mView.showPlayerWinDialog(players[0].getName());
         }
     }
 
@@ -139,14 +144,14 @@ public class LocalGame {
 
     public void userTurn(Card c) {
         if (currentPlayer != 0) return;
-        if (!(c.getColour().equals(currentCard.getColour()) || c.getValue().equals(currentCard.getValue()) || c.getColour().equals(Card.Colour.BLACK)))
-            return;
+        if (!(c.getColour().equals(currentCard.getColour()) || c.getValue().equals(currentCard.getValue()) || c.getColour().equals(Card.Colour.BLACK))) return;
 
         //Actions
         if (c.getId() == -2) {
             //All cards in deck played
             mView.gameDrawDialog();
         } else {
+            bluetoothConnectionService.write("playedCard", String.valueOf(c.getId()));
             changeCurrentCard(c);
             playerRemoveCard(0, c);
             checkForWin();
@@ -156,23 +161,37 @@ public class LocalGame {
 
     public void userDrawCard() {
         if (currentPlayer != 0) return;
-        playerDrawCard(0);
+
+        int id = deck.getRandomCard().getId();
+        mView.addCardView(0, id);
+
+        bluetoothConnectionService.write("drawCard", String.valueOf(id));
+
         changeTurn();
     }
 
+    private void drawFirstCards(){
+        for(int i = 0; i < 7; i ++){
+            int id = deck.getRandomCard().getId();
+            mView.addCardView(0, id);
+
+            bluetoothConnectionService.write("drawCard", String.valueOf(id));
+        }
+    }
+
     public void wildCard() {
-        int nextPlayer = getNextPlayer();
-        playerDrawCard(nextPlayer, 4);
+        playerDrawCard(4);
     }
 
-    private void playerDrawCard(int player) {
-        playerDrawCard(player, 1);
+    public void changeColour(Card c){
+        changeCurrentCard(c);
+        bluetoothConnectionService.write("colour", c.getColour().toString());
     }
 
-    private void playerDrawCard(final int player, final int num) {
+    private void playerDrawCard(int num) {
         for (int i = 0; i < num; i++) {
             int id = deck.getRandomCard().getId();
-            mView.addCardView(player, id);
+            mView.addCardView(1, id);
 
             bluetoothConnectionService.write("draw", String.valueOf(id));
         }
@@ -180,14 +199,13 @@ public class LocalGame {
 
     private void playerRemoveCard(int player, final Card c) {
         mView.removeCardView(player, c.getId());
-
     }
 
     public void leaveGame(){
         bluetoothConnectionService.disconnect();
     }
 
-    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+    public final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -207,16 +225,47 @@ public class LocalGame {
         switch (key) {
             case "name":
                 mView.setupPlayerName(1, msg);
+                players[1].setName(msg);
+                if(!isHosting) mView.changeTurnText(msg);
                 break;
             case "photoId":
                 mView.setupPlayerPhoto(1, Integer.parseInt(msg));
+                players[1].setPhotoId(Integer.parseInt(msg));
                 break;
             case "playedCard":
-                changeCurrentCard(deck.fetchCard(Integer.parseInt(msg)));
-                action(deck.fetchCard(Integer.parseInt(msg)));
+                Card c = deck.fetchCard(Integer.parseInt(msg));
+                onReceiveAction(c);
                 break;
             case "draw":
-                mView.addCardView(1, Integer.parseInt(msg));
+                mView.addCardView(0, Integer.parseInt(msg));
+                break;
+            case "firstCard":
+                changeCurrentCard(deck.fetchCard(Integer.parseInt(msg)));
+                break;
+            case "drawCard":
+                Card card = deck.fetchCard(Integer.parseInt(msg));
+                mView.addCardView(1, card.getId());
+                changeTurn();
+                break;
+            case "won":
+                hasWon = true;
+                mView.showPlayerWinDialog(msg);
+                break;
+            case "colour":
+                switch(msg){
+                    case "RED":
+                        changeCurrentCard(deck.fetchCard(109));
+                        break;
+                    case "YELLOW":
+                        changeCurrentCard(deck.fetchCard(110));
+                        break;
+                     case "GREEN":
+                         changeCurrentCard(deck.fetchCard(111));
+                         break;
+                     case "BLUE":
+                         changeCurrentCard(deck.fetchCard(112));
+                         break;
+            }
                 break;
         }
     }

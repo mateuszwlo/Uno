@@ -16,8 +16,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Deck;
-import com.mateusz.uno.internetmultiplayer.InternetGameData;
-import com.mateusz.uno.internetmultiplayer.InternetPlayerCards;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 
