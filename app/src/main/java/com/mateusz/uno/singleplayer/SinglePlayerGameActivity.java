@@ -7,9 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,19 +24,20 @@ import com.mateusz.uno.data.UserData;
 import com.mateusz.uno.singleplayer.PlayerCardView.AIPlayerCardView;
 import com.mateusz.uno.start.StartActivity;
 
+import static com.mateusz.uno.singleplayer.SinglePlayerGame.pickUpAmount;
+
 public class SinglePlayerGameActivity extends AppCompatActivity implements SinglePlayerMvpView, View.OnClickListener {
 
     private LinearLayout userCards;
     private ImageView deckIv;
     private ImageView pileIv;
     private TextView playerTurnTv;
-    private AlertDialog colourPickerDialog;
+    private AlertDialog colourPickerDialog, stackDialog;
     public static SinglePlayerGame game;
     private int playerCount;
     private HorizontalScrollView.LayoutParams scrollViewParams;
     LinearLayout.LayoutParams cardParams;
 
-    private LinearLayout.LayoutParams layoutParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +112,6 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
     }
 
     //View Methods
-
     //User Cards
     @Override
     public void addCardView(int player, Card c) {
@@ -147,6 +149,64 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
     @Override
     public int getPlayer1CardCount() {
         return userCards.getChildCount();
+    }
+
+    @Override
+    public void canUserStack() {
+        Log.d("CARDS: ", "" + userCards.getChildCount());
+        for(int i = 0; i < userCards.getChildCount(); i++){
+            Card c = game.getDeck().fetchCard(userCards.getChildAt(i).getId());
+            Log.d("CARD:", c.toString());
+            if(c.getValue().equals("plus2")){
+                willStack(c);
+                return;
+            }
+        }
+        game.pickUpStack();
+    }
+
+    @Override
+    public void canUserStackWild() {
+        for(int i = 0; i < userCards.getChildCount(); i++){
+            Card c = game.getDeck().fetchCard(userCards.getChildAt(i).getId());
+            if(c.getValue().equals("wildcard")){
+                willStack(c);
+                return;
+            }
+        }
+        game.pickUpStackWild();
+    }
+
+    public void willStack(final Card c){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.user_stack_dialog, null);
+
+        final Button stackBtn = view.findViewById(R.id.stackCardsBtn);
+        stackBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.stack(c);
+                stackDialog.dismiss();
+            }
+        });
+
+        Button pickUpCardsBtn = view.findViewById(R.id.pickUpCardsBtn);
+        pickUpCardsBtn.setText("Pick up " + pickUpAmount + " Cards");
+
+        pickUpCardsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.pickUpStack();
+                stackDialog.dismiss();
+            }
+        });
+
+
+        builder.setView(view);
+        builder.setCancelable(false);
+        stackDialog = builder.create();
+        stackDialog.show();
     }
 
     public LinearLayout.LayoutParams getUserCardParams() {

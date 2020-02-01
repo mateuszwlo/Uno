@@ -259,13 +259,13 @@ public class LocalGame {
                     case "YELLOW":
                         changeCurrentCard(deck.fetchCard(110));
                         break;
-                     case "GREEN":
-                         changeCurrentCard(deck.fetchCard(111));
-                         break;
-                     case "BLUE":
-                         changeCurrentCard(deck.fetchCard(112));
-                         break;
-            }
+                    case "GREEN":
+                        changeCurrentCard(deck.fetchCard(111));
+                        break;
+                    case "BLUE":
+                        changeCurrentCard(deck.fetchCard(112));
+                        break;
+                }
                 break;
         }
     }

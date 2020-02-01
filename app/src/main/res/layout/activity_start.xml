@@ -4,115 +4,134 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ED1C24"
+    android:background="@drawable/gradient_background"
     android:orientation="vertical"
     tools:context=".ui.start.StartActivity">
 
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/guideline0.15"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/logo" />
+  <ImageView
+      android:id="@+id/logo"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:src="@drawable/logo"
+      app:layout_constraintBottom_toTopOf="@+id/guideline0.3"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@id/guidelineh0.05" />
 
-    <Button
-        android:id="@+id/singlePlayerBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFFFFF"
-        android:fontFamily="@font/baloo"
-        android:text="VS COMPUTER"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline0.45" />
+  <Button
+      android:id="@+id/singlePlayerBtn"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="15dp"
+      android:layout_marginRight="15dp"
+      android:background="@drawable/rounded_button"
+      android:backgroundTint="@color/light_grey"
+      android:fontFamily="@font/nova_round"
+      android:text="VS COMPUTER"
+      android:textSize="18sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="1.0"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/guideline0.45" />
 
-    <Button
-        android:id="@+id/localMultiplayerBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="#FFFFFF"
-        android:fontFamily="@font/baloo"
-        android:text="Local Multiplayer"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/singlePlayerBtn" />
+  <Button
+      android:id="@+id/localMultiplayerBtn"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="15dp"
+      android:layout_marginTop="32dp"
+      android:layout_marginRight="15dp"
+      android:background="@drawable/rounded_button"
+      android:backgroundTint="@color/light_grey"
+      android:fontFamily="@font/nova_round"
+      android:text="Local Multiplayer"
+      android:textSize="18sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintHorizontal_bias="0.0"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/singlePlayerBtn" />
 
-    <Button
-        android:id="@+id/internetMultiplayerBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:background="#FFFFFF"
-        android:fontFamily="@font/baloo"
-        android:text="Internet Multiplayer"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/localMultiplayerBtn" />
+  <Button
+      android:id="@+id/internetMultiplayerBtn"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_marginLeft="15dp"
+      android:layout_marginTop="32dp"
+      android:layout_marginRight="15dp"
+      android:background="@drawable/rounded_button"
+      android:backgroundTint="@color/light_grey"
+      android:fontFamily="@font/nova_round"
+      android:text="Internet Multiplayer"
+      android:textSize="18sp"
+      android:textStyle="bold"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@+id/localMultiplayerBtn" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline0.15"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp"
-        app:layout_constraintGuide_percent="0.25" />
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guideline0.3"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintGuide_percent="0.3" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline0.45"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp"
-        app:layout_constraintGuide_percent="0.45" />
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guideline0.45"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintGuide_begin="20dp"
+      app:layout_constraintGuide_percent="0.45" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline0.9"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp"
-        app:layout_constraintGuide_percent="0.9" />
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guideline0.9"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintGuide_begin="20dp"
+      app:layout_constraintGuide_percent="0.9" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guidelinev0.2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="20dp"
-        app:layout_constraintGuide_percent="0.2" />
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guidelinev0.2"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      app:layout_constraintGuide_begin="20dp"
+      app:layout_constraintGuide_percent="0.2" />
 
-    <ImageView
-        android:id="@+id/avatarIv"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/guidelinev0.2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline0.9"
-        tools:srcCompat="@tools:sample/avatars[0]" />
+  <ImageView
+      android:id="@+id/avatarIv"
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:layout_marginBottom="8dp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintEnd_toStartOf="@+id/guidelinev0.2"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="@+id/guideline0.9"
+      tools:srcCompat="@tools:sample/avatars[0]" />
 
-    <TextView
-        android:id="@+id/nameTv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginBottom="8dp"
-        android:fontFamily="@font/cabin"
-        android:text="Name"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guidelinev0.2"
-        app:layout_constraintTop_toTopOf="@+id/guideline0.9" />
+  <TextView
+      android:id="@+id/nameTv"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="16dp"
+      android:layout_marginBottom="8dp"
+      android:fontFamily="@font/cabin"
+      android:text="Name"
+      android:textColor="#FFFFFF"
+      android:textSize="20sp"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="@+id/guidelinev0.2"
+      app:layout_constraintTop_toTopOf="@+id/guideline0.9" />
+
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guidelineh0.05"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintGuide_begin="20dp"
+      app:layout_constraintGuide_percent="0.05" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

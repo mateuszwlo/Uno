@@ -2,10 +2,10 @@ package com.mateusz.uno.singleplayer;
 
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Deck;
-import com.mateusz.uno.data.Player;
-import com.mateusz.uno.singleplayer.SinglePlayerMvpView;
 
 import static com.mateusz.uno.singleplayer.SinglePlayerGame.currentCard;
+import static com.mateusz.uno.singleplayer.SinglePlayerGameActivity.game;
+
 public class User implements Player {
 
     private String name;
@@ -57,5 +57,20 @@ public class User implements Player {
     @Override
     public void wildCard() {
         mView.showWildCardColourPickerDialog();
+    }
+
+    @Override
+    public void willStackWild() {
+        mView.canUserStackWild();
+    }
+
+    @Override
+    public void willStack(){
+        mView.canUserStack();
+    }
+
+    @Override
+    public void removeCard(Card c){
+        mView.removeCardView(0, c);
     }
 }

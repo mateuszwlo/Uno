@@ -8,6 +8,8 @@ public interface SinglePlayerMvpView {
   void addCardView(int player, Card c);
   void removeCardView(int player, Card c);
   int getPlayer1CardCount();
+  void canUserStack();
+  void canUserStackWild();
 
   //Game
   void changeCurrentCardView(int id);

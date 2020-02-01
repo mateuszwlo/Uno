@@ -1,16 +1,14 @@
 package com.mateusz.uno.singleplayer;
 
 import android.content.Context;
+import android.util.Log;
+import android.widget.Toast;
 
-import com.mateusz.uno.singleplayer.AIPlayer;
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Card.Colour;
 import com.mateusz.uno.data.Deck;
-import com.mateusz.uno.data.Player;
 import com.mateusz.uno.data.SharedPrefsHelper;
-import com.mateusz.uno.singleplayer.User;
 import com.mateusz.uno.data.UserData;
-import com.mateusz.uno.singleplayer.SinglePlayerMvpView;
 
 import java.util.Random;
 
@@ -24,6 +22,8 @@ public class SinglePlayerGame {
     private int order;
     private boolean hasWon = false;
     private String[] names = {"Matt", "Ben", "Tim", "Amy", "John", "Sara", "Maisie", "Sophie", "Jess", "Pam", "Alan", "Romeo", "Alexa", "Robert", "Tracy", "Bill"};
+    public static int pickUpAmount = 0;
+    private Colour pendingColour;
 
     public SinglePlayerGame(int playerCount, SinglePlayerMvpView mView) {
         this.mView = mView;
@@ -70,15 +70,34 @@ public class SinglePlayerGame {
         players[currentPlayer].turn(currentCard);
      }
 
+     public void stack(Card c){
+         players[currentPlayer].removeCard(c);
+         changeCurrentCard(c);
+         checkForWin();
+         action(c);
+     }
+
+     public void pickUpStack(){
+         for(int i = 0; i < pickUpAmount; i++) players[currentPlayer].drawCard();
+
+         pickUpAmount = 0;
+         changeTurn();
+         play();
+     }
+
+     public void pickUpStackWild(){
+        mView.changeColour(pendingColour);
+        pickUpStack();
+     }
+
     private void action(Card c) {
         if(hasWon) return;
 
         switch (c.getValue()) {
             case "plus2":
-                players[getNextPlayer()].drawCard();
-                players[getNextPlayer()].drawCard();
-                changeTurn(2);
-                play();
+                pickUpAmount += 2;
+                changeTurn();
+                players[currentPlayer].willStack();
                 return;
             case "skip":
                 changeTurn(2);
@@ -95,6 +114,7 @@ public class SinglePlayerGame {
                 players[currentPlayer].changeColour();
                 return;
             case "wildcard":
+                pickUpAmount += 4;
                 players[currentPlayer].wildCard();
                 return;
             default:
@@ -102,7 +122,6 @@ public class SinglePlayerGame {
                 play();
                 break;
         }
-
     }
 
     private int getNextPlayer(){
@@ -175,15 +194,9 @@ public class SinglePlayerGame {
     }
 
     public void wildCard(Colour c){
-        mView.changeColour(c);
-
-        int nextPlayer = getNextPlayer();
-        for(int i = 0; i < 4; i++){
-            players[nextPlayer].drawCard();
-        }
-
-        changeTurn(2);
-        play();
+        pendingColour = c;
+        changeTurn();
+        players[currentPlayer].willStackWild();
     }
 
     public void changeColour(Colour c){

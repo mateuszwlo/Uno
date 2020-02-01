@@ -2,42 +2,42 @@ package com.mateusz.uno.data;
 
 public class Card {
 
-  private Colour colour;
-  private String value;
-  private int id;
+    private Colour colour;
+    private String value;
+    private int id;
 
-  public Card(int id, Colour colour, String value) {
-    this.id = id;
-    this.colour = colour;
-    this.value = value;
-  }
+    public Card(int id, Colour colour, String value) {
+        this.id = id;
+        this.colour = colour;
+        this.value = value;
+    }
 
-  public Colour getColour() {
-    return colour;
-  }
+    public Colour getColour() {
+        return colour;
+    }
 
-  public String getValue() {
-    return value;
-  }
+    public String getValue() {
+        return value;
+    }
 
-  public int getId() {
-    return id;
-  }
+    public int getId() {
+        return id;
+    }
 
-  @Override
-  public String toString() {
-    return "Card{" +
-            "colour=" + colour +
-            ", value='" + value + '\'' +
-            ", id=" + id +
-            '}';
-  }
+    @Override
+    public String toString() {
+        return "Card{" +
+                "colour=" + colour +
+                ", value='" + value + '\'' +
+                ", id=" + id +
+                '}';
+    }
 
-  public enum Colour{
-    RED,
-    BLUE,
-    GREEN,
-    YELLOW,
-    BLACK
-  }
+    public enum Colour{
+        RED,
+        BLUE,
+        GREEN,
+        YELLOW,
+        BLACK
+    }
 }

@@ -119,7 +119,7 @@ public class StartActivity extends AppCompatActivity implements View.OnClickList
         threePlayerBtn.setOnClickListener(this);
 
         builder.setView(view);
-        builder.setCancelable(false);
+        builder.setCancelable(true);
         dialog = builder.create();
         dialog.show();
     }

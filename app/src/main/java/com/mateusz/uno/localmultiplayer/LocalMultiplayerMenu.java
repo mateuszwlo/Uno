@@ -19,6 +19,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.mateusz.uno.R;
+import com.mateusz.uno.start.StartActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -154,6 +155,13 @@ public class LocalMultiplayerMenu extends AppCompatActivity implements View.OnCl
         unregisterReceiver(enableBtReceiver);
         unregisterReceiver(discoveryReceiver);
         unregisterReceiver(discoverabilityReceiver);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(LocalMultiplayerMenu.this, StartActivity.class));
+        finish();
     }
 
     private final BroadcastReceiver enableBtReceiver = new BroadcastReceiver() {

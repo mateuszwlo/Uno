@@ -219,8 +219,8 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
 
         //Other players' cards
         AIPlayerCardView cardView = findViewById(getResources()
-            .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
-            .findViewById(R.id.playerCardsLayout);
+                .getIdentifier("player" + (player + 1) + "Cards", "id", getPackageName()))
+                .findViewById(R.id.playerCardsLayout);
 
         for(int card : cards){
             if(cardView.findViewById(card) == null) cardView.addCard(card);

@@ -4,62 +4,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
     android:padding="15dp"
     tools:context=".internetmultiplayer.CreateInternetGameActivity">
 
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="0dp"
+      android:layout_height="0dp"
+      android:background="@drawable/rounded_rectangle"
+      android:backgroundTint="@color/light_grey"
+      app:layout_constraintBottom_toBottomOf="@id/guidelineh0.5"
+      app:layout_constraintEnd_toEndOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toTopOf="parent">
+
     <EditText
         android:id="@+id/gameNameEt"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:ems="10"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/uno_red"
+        android:fontFamily="@font/nova_round"
         android:gravity="center_horizontal"
         android:hint="Game Name"
         android:inputType="textPersonName"
+        android:textAllCaps="false"
+        android:textColor="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <RadioGroup
         android:id="@+id/radioGroup"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gameNameEt">
 
-        <RadioButton
-            android:id="@+id/twoPlayerRBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:buttonTint="#F44336"
-            android:checked="true"
-            android:text="2 Player" />
+      <RadioButton
+          android:id="@+id/twoPlayerRBtn"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:buttonTint="@color/light_red"
+          android:checked="true"
+          android:text="2 Player"
+          android:textSize="15sp" />
 
-        <RadioButton
-            android:id="@+id/threePlayerRBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:buttonTint="#F44336"
-            android:text="3 Player" />
+      <RadioButton
+          android:id="@+id/threePlayerRBtn"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:buttonTint="@color/light_red"
+          android:text="3 Player"
+          android:textSize="15sp" />
 
-        <RadioButton
-            android:id="@+id/fourPlayerRBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:buttonTint="#F44336"
-            android:text="4 Player" />
+      <RadioButton
+          android:id="@+id/fourPlayerRBtn"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:buttonTint="@color/light_red"
+          android:text="4 Player"
+          android:textSize="15sp" />
     </RadioGroup>
 
     <Button
-        android:id="@+id/sendMsgBtn"
-        android:layout_width="wrap_content"
+        android:id="@+id/hostGameBtn"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/rounded_button"
+        android:backgroundTint="#FFFFFF"
+        android:fontFamily="@font/convergence"
         android:text="Create Game"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radioGroup" />
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <androidx.constraintlayout.widget.Guideline
+      android:id="@+id/guidelineh0.5"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:orientation="horizontal"
+      app:layout_constraintGuide_begin="20dp"
+      app:layout_constraintGuide_percent="0.5" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

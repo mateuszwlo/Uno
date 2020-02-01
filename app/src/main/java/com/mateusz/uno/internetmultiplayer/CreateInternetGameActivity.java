@@ -118,4 +118,11 @@ public class CreateInternetGameActivity extends AppCompatActivity implements Vie
         startActivity(i);
         finish();
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        startActivity(new Intent(CreateInternetGameActivity.this, InternetMultiplayerMenu.class));
+        finish();
+    }
 }

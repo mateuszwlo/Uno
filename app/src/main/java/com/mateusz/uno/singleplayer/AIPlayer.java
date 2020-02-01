@@ -4,10 +4,11 @@ import android.os.Handler;
 
 import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.Deck;
-import com.mateusz.uno.data.Player;
+
 import java.util.ArrayList;
 
 import static com.mateusz.uno.singleplayer.SinglePlayerGameActivity.game;
+
 import com.mateusz.uno.data.Card.Colour;
 
 public class AIPlayer implements Player {
@@ -56,7 +57,7 @@ public class AIPlayer implements Player {
                     }
                 }
 
-                if(playCard != null) mView.removeCardView(id, playCard);
+                if (playCard != null) mView.removeCardView(id, playCard);
                 game.turn(playCard);
             }
         };
@@ -80,8 +81,8 @@ public class AIPlayer implements Player {
 
                 Colour col = Colour.BLUE;
 
-                for(int i = 0; i < cards.size(); i++){
-                    if(cards.get(i).getColour() != Colour.BLACK){
+                for (int i = 0; i < cards.size(); i++) {
+                    if (cards.get(i).getColour() != Colour.BLACK) {
                         col = cards.get(i).getColour();
                         break;
                     }
@@ -105,8 +106,8 @@ public class AIPlayer implements Player {
 
                 Colour col = Colour.BLUE;
 
-                for(int i = 0; i < cards.size(); i++){
-                    if(cards.get(i).getColour() != Colour.BLACK){
+                for (int i = 0; i < cards.size(); i++) {
+                    if (cards.get(i).getColour() != Colour.BLACK) {
                         col = cards.get(i).getColour();
                         break;
                     }
@@ -120,7 +121,55 @@ public class AIPlayer implements Player {
     }
 
     @Override
+    public void willStackWild() {
+        boolean canStack = false;
+
+        for (final Card c : cards) {
+            if (c.getValue().equals("wildcard")) {
+                canStack = true;
+
+                Handler handler = new Handler();
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        game.stack(c);
+                    }
+                };
+                handler.postDelayed(r, turnTime);
+            }
+        }
+        if(!canStack) game.pickUpStackWild();
+    }
+
+    @Override
+    public void willStack() {
+        boolean canStack = false;
+
+        for (final Card c : cards) {
+            if (c.getValue().equals("plus2")) {
+                canStack = true;
+
+                Handler handler = new Handler();
+                Runnable r = new Runnable() {
+                    @Override
+                    public void run() {
+                        game.stack(c);
+                    }
+                };
+                handler.postDelayed(r, turnTime);
+            }
+        }
+        if(!canStack) game.pickUpStack();
+    }
+
+    @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void removeCard(Card c) {
+        cards.remove(c);
+        mView.removeCardView(id, c);
     }
 }
