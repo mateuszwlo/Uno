@@ -10,6 +10,7 @@ public class InternetGameData {
     private int currentCard;
     private int playerCount;
     private int currentPlayer;
+    private int pickUpAmount;
 
     public InternetGameData(){
         //No Argument Constructor
@@ -53,5 +54,13 @@ public class InternetGameData {
 
     public void setCurrentPlayer(int currentPlayer) {
         this.currentPlayer = currentPlayer;
+    }
+
+    public int getPickUpAmount() {
+        return pickUpAmount;
+    }
+
+    public void setPickUpAmount(int pickUpAmount) {
+        this.pickUpAmount = pickUpAmount;
     }
 }

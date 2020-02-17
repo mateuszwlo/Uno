@@ -19,6 +19,8 @@ public class AIPlayerCardView extends LinearLayout {
 
         ImageView iv = new ImageView(this.getContext());
         iv.setImageResource(R.drawable.c108);
+        //Testing Mode:
+        //iv.setImageResource(getResources().getIdentifier("c" + id, "drawable", getContext().getPackageName()));
         iv.setId(id);
 
         this.addView(iv, getParams());

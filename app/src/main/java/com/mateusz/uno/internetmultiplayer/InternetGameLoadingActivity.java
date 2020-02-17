@@ -18,6 +18,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.R;
@@ -92,15 +93,23 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
                 gameRef.collection("players").addSnapshotListener(InternetGameLoadingActivity.this, new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                        //This line fixed the game (adding 100 cards bug)
+                        if(hasJoinedGame) return;
 
+                        if (gameData.getPlayerCount() == queryDocumentSnapshots.size()) {
+                            hasJoinedGame = true;
 
-                        if (gameData.getPlayerCount() == queryDocumentSnapshots.size())
-                            startGame(gameData.getPlayerCount());
+                            Intent i = new Intent(InternetGameLoadingActivity.this, InternetGameActivity.class);
+                            i.putExtra("gameId", gameId);
+                            i.putExtra("playerCount", gameData.getPlayerCount());
+                            startActivity(i);
+                            finish();
+                            return;
+                        }
 
                         //Update Player List
                         for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
-                            usersDb.document(doc.getId())
-                                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            usersDb.document(doc.getId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                 @Override
                                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                                     UserData data = documentSnapshot.toObject(UserData.class);
@@ -128,22 +137,10 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
         }
     }
 
-    private void checkIfPlayersLeft() {
-        gameRef.collection("players").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                if (queryDocumentSnapshots == null || queryDocumentSnapshots.size() == 0) {
-                    gameRef.delete();
-                }
-            }
-        });
-    }
-
     @Override
     protected void onDestroy() {
         if (!hasJoinedGame) {
             gameRef.collection("players").document(userData.getId()).delete();
-            checkIfPlayersLeft();
         }
         super.onDestroy();
     }
@@ -154,13 +151,4 @@ public class InternetGameLoadingActivity extends AppCompatActivity {
         finish();
     }
 
-    private void startGame(int playerCount) {
-        hasJoinedGame = true;
-
-        Intent i = new Intent(InternetGameLoadingActivity.this, InternetGameActivity.class);
-        i.putExtra("gameId", gameId);
-        i.putExtra("playerCount", playerCount);
-        startActivity(i);
-        finish();
-    }
 }

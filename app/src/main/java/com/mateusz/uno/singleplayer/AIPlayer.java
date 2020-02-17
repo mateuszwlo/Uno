@@ -8,6 +8,7 @@ import com.mateusz.uno.data.Deck;
 import java.util.ArrayList;
 
 import static com.mateusz.uno.singleplayer.SinglePlayerGameActivity.game;
+import static com.mateusz.uno.singleplayer.SinglePlayerGame.deck;
 
 import com.mateusz.uno.data.Card.Colour;
 
@@ -18,10 +19,8 @@ public class AIPlayer implements Player {
     private int turnTime = 1000;
     private SinglePlayerMvpView mView;
     private int id;
-    private Deck deck;
 
-    public AIPlayer(Deck deck, int id, String name, SinglePlayerMvpView singlePlayerMvpView) {
-        this.deck = deck;
+    public AIPlayer(int id, String name, SinglePlayerMvpView singlePlayerMvpView) {
         this.id = id;
         this.name = name;
         this.mView = singlePlayerMvpView;

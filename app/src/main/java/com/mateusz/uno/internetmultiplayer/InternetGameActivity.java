@@ -9,14 +9,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.common.internal.DialogRedirect;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.mateusz.uno.R;
+import com.mateusz.uno.data.Card;
 import com.mateusz.uno.data.SharedPrefsHelper;
 import com.mateusz.uno.data.UserData;
 import com.mateusz.uno.singleplayer.PlayerCardView.AIPlayerCardView;
@@ -35,6 +39,7 @@ import com.mateusz.uno.singleplayer.PlayerCardView.AIPlayerCardView;
 import java.util.List;
 
 import static com.mateusz.uno.internetmultiplayer.InternetGame.deck;
+import static com.mateusz.uno.internetmultiplayer.InternetGame.pickUpAmount;
 import static com.mateusz.uno.internetmultiplayer.InternetGame.ready;
 
 public class InternetGameActivity extends AppCompatActivity implements View.OnClickListener, InternetGameMvpView {
@@ -52,7 +57,7 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
     private ImageView deckIv;
     private ImageView pileIv;
     private TextView playerTurnTv;
-    private AlertDialog colourPickerDialog;
+    private AlertDialog colourPickerDialog, stackDialog, playerQuitDialog;
     private HorizontalScrollView.LayoutParams scrollViewParams;
     private ProgressDialog loadingGameDialog;
     private LinearLayout.LayoutParams cardParams;
@@ -72,7 +77,7 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
 
         setupBoard();
         initialiseViews();
-
+        Log.d("GAME", "STARTING");
         game = new InternetGame(gameId, playerCount, this);
     }
 
@@ -83,6 +88,7 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         if(!ready){
             loadingGameDialog = new ProgressDialog(InternetGameActivity.this);
             loadingGameDialog.setMessage("Loading Game");
+            loadingGameDialog.setCancelable(false);
             loadingGameDialog.show();
         }
 
@@ -112,7 +118,30 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
                 gameRef.collection("players").addSnapshotListener(InternetGameActivity.this, new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                        if(gameData.getPlayerCount() != queryDocumentSnapshots.size()) leaveGame();
+                        if(gameData.getPlayerCount() != queryDocumentSnapshots.size()){
+                            if(hasLeft) return;
+
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(InternetGameActivity.this)
+                                    .setMessage("A player has left the game.")
+                                    .setPositiveButton("Play Again.", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            leaveGame();
+                                            finish();
+                                        }
+                                    })
+                                    .setNegativeButton("Exit.", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            leaveGame();
+                                            System.exit(0);
+                                        }
+                                    });
+
+                            playerQuitDialog = builder.create();
+                            playerQuitDialog.show();
+                        }
                     }
                 });
             }
@@ -233,6 +262,66 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
                 cardView.removeView(cardView.getChildAt(i));
             }
         }
+    }
+
+    @Override
+    public void canUserStack(){
+        for(int i = 0; i < userCards.getChildCount(); i++){
+            Card c = deck.fetchCard(userCards.getChildAt(i).getId());
+
+            if(c.getValue().equals("plus2")){
+                willUserStack(c);
+                return;
+            }
+        }
+
+        game.pickUpStack();
+    }
+
+    @Override
+    public void canUserStackWild(){
+        for(int i = 0; i < userCards.getChildCount(); i++){
+            Card c = deck.fetchCard(userCards.getChildAt(i).getId());
+
+            if(c.getValue().equals("wildcard")){
+                willUserStack(c);
+                return;
+            }
+        }
+
+        game.pickUpStack();
+    }
+
+    public void willUserStack(final Card c){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = getLayoutInflater();
+        View view = inflater.inflate(R.layout.user_stack_dialog, null);
+
+        final Button stackBtn = view.findViewById(R.id.stackCardsBtn);
+        stackBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.stack(c);
+                stackDialog.dismiss();
+            }
+        });
+
+        Button pickUpCardsBtn = view.findViewById(R.id.pickUpCardsBtn);
+        pickUpCardsBtn.setText("Pick up " + pickUpAmount + " Cards");
+
+        pickUpCardsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                game.pickUpStack();
+                stackDialog.dismiss();
+            }
+        });
+
+
+        builder.setView(view);
+        builder.setCancelable(false);
+        stackDialog = builder.create();
+        stackDialog.show();
     }
 
     public LinearLayout.LayoutParams getUserCardParams() {
@@ -361,7 +450,6 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         redIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.wildCard();
                 colourPickerDialog.dismiss();
                 game.changeCurrentCard(deck.fetchCard(109));
             }
@@ -371,7 +459,6 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         yellowIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.wildCard();
                 colourPickerDialog.dismiss();
                 game.changeCurrentCard(deck.fetchCard(110));
             }
@@ -381,7 +468,6 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         greenIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.wildCard();
                 colourPickerDialog.dismiss();
                 game.changeCurrentCard(deck.fetchCard(111));
             }
@@ -391,7 +477,6 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         blueIv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                game.wildCard();
                 colourPickerDialog.dismiss();
                 game.changeCurrentCard(deck.fetchCard(112));
             }
@@ -417,6 +502,7 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         leaveGame();
+
                     }
                 })
                 .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
@@ -459,6 +545,7 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
     @Override
     protected void onDestroy() {
         loadingGameDialog.dismiss();
+        playerQuitDialog.dismiss();
 
         if(!hasLeft){
             leaveGame();
@@ -473,13 +560,25 @@ public class InternetGameActivity extends AppCompatActivity implements View.OnCl
         gameRef.collection("players").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                if(queryDocumentSnapshots.size() == 1) gameRef.delete();
-                else gameRef.collection("players").document(userData.getId()).delete();
+                //if(queryDocumentSnapshots.size() == 1) gameRef.delete();
+                gameRef.collection("players").document(userData.getId()).delete();
             }
         });
 
-        Intent i = new Intent(InternetGameActivity.this, InternetMultiplayerMenu.class);
-        startActivity(i);
+        startActivity(new Intent(InternetGameActivity.this, InternetMultiplayerMenu.class));
         finish();
+    }
+
+    @Override
+    public boolean isLoaded(){
+        for(int i = 2; i < playerCount; i++){
+            TextView tv = findViewById(getResources().getIdentifier("player" + i + "Cards", "id", getPackageName()))
+                    .findViewById(R.id.nameTv);
+
+            if(tv.getText().toString().equals("")) return false;
+
+        }
+
+        return true;
     }
 }

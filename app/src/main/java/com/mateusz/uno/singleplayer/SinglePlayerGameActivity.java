@@ -111,7 +111,6 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
         }
     }
 
-    //View Methods
     //User Cards
     @Override
     public void addCardView(int player, Card c) {
@@ -153,10 +152,8 @@ public class SinglePlayerGameActivity extends AppCompatActivity implements Singl
 
     @Override
     public void canUserStack() {
-        Log.d("CARDS: ", "" + userCards.getChildCount());
         for(int i = 0; i < userCards.getChildCount(); i++){
             Card c = game.getDeck().fetchCard(userCards.getChildAt(i).getId());
-            Log.d("CARD:", c.toString());
             if(c.getValue().equals("plus2")){
                 willStack(c);
                 return;

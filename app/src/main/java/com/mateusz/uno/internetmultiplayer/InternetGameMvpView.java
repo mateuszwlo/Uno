@@ -11,6 +11,8 @@ public interface InternetGameMvpView {
     void removeCardView(int player, int id);
     void updateCardViews(int player, List<Integer> cards);
     int getPlayerCardCount(int player);
+    void canUserStack();
+    void canUserStackWild();
 
     //Game
     void changeCurrentCardView(int id);
@@ -19,6 +21,7 @@ public interface InternetGameMvpView {
 
     //Player cards
     int getAvatarResource(int id);
+    boolean isLoaded();
 
     //Dialogs
     void showPlayerWinDialog(String player);

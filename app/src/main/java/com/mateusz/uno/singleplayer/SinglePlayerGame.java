@@ -16,7 +16,7 @@ public class SinglePlayerGame {
 
     private SinglePlayerMvpView mView;
     public static Card currentCard;
-    public Deck deck;
+    public static Deck deck;
     private Player[] players;
     private int currentPlayer;
     private int order;
@@ -46,7 +46,7 @@ public class SinglePlayerGame {
 
         for(int i = 1; i < players.length; i++){
             UserData data = getRandomData();
-            players[i] = new AIPlayer(deck, i, data.getName(), mView);
+            players[i] = new AIPlayer(i, data.getName(), mView);
 
             //Setting player data
             mView.setupPlayerData(i + 1, data);
@@ -78,6 +78,8 @@ public class SinglePlayerGame {
      }
 
      public void pickUpStack(){
+        Toast.makeText((Context) mView, players[currentPlayer].getName() + " picks up " + pickUpAmount + " cards.", Toast.LENGTH_SHORT).show();
+
          for(int i = 0; i < pickUpAmount; i++) players[currentPlayer].drawCard();
 
          pickUpAmount = 0;
